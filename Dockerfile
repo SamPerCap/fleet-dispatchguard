@@ -5,14 +5,14 @@
 #   demo loader      docker run --entrypoint dotnet <image> /app/sample-data/DispatchGuard.SampleData.dll --api <url> [--reset-key <k> | --check]
 # Base images by digest, so that the same commit is always the same image; Dependabot proposes the new ones.
 
-FROM node:24-bookworm-slim@sha256:873f586f3794f52281bd039bf02c048a0be08fde619338f9941bad1eb6b34530 AS web
+FROM node:25-bookworm-slim@sha256:81db02c4b671288a03915da9534dbd54f96d0e7c24d80ccc54f5b36b2e684370 AS web
 WORKDIR /web
 COPY web/package.json web/package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY web/ ./
 RUN npm run build
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0@sha256:8c6edfb26c85153f236d26efebd9ad349aec403583f343f201ee67838b23658d AS build
+FROM mcr.microsoft.com/dotnet/sdk:11.0@sha256:2794448a07118a6eaf00f29ab5d2bf44928517ce5ff86505a63a69230374f599 AS build
 WORKDIR /repo
 RUN dotnet tool install dotnet-ef --version 10.0.15 --tool-path /tools
 COPY global.json Directory.Build.props .editorconfig ./
