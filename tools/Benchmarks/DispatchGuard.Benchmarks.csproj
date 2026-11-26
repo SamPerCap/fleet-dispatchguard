@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>DispatchGuard.Benchmarks</RootNamespace>
+    <AssemblyName>DispatchGuard.Benchmarks</AssemblyName>
+  </PropertyGroup>
+
+  <!-- SPEC 0039: measures the pure CE 561/2006 evaluation; no Application/Infrastructure. SPEC 0097: the cost of the X-ray, whose seal lives in Web.Api. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Core\Core.csproj" />
+    <ProjectReference Include="..\..\src\Web.Api\Web.Api.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" Version="0.15.8" />
+  </ItemGroup>
+
+</Project>

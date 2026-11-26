@@ -1,0 +1,20 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="docker-compose.yml" />
+  </Folder>
+  <Folder Name="/src/">
+    <Project Path="src/Application/Application.csproj" />
+    <Project Path="src/Core/Core.csproj" />
+    <Project Path="src/DemoData/DemoData.csproj" />
+    <Project Path="src/Infrastructure/Infrastructure.csproj" />
+    <Project Path="src/Web.Api/Web.Api.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/Benchmarks/DispatchGuard.Benchmarks.csproj" />
+    <Project Path="tools/SampleData/SampleData.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/Core.Tests/Core.Tests.csproj" Id="3dd5690a-5a27-4e1f-994b-81f6c7dae5b0" />
+    <Project Path="Tests/Infrastructure.Tests/Infrastructure.Tests.csproj" Id="b3181c30-0435-4b32-8629-e4ad3ec2b54d" />
+  </Folder>
+</Solution>

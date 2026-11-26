@@ -1,0 +1,54 @@
+root = true
+
+[*]
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{cs,ts,tsx,js}]
+indent_style = space
+
+[*.cs]
+indent_size = 4
+csharp_style_namespace_declarations = file_scoped
+
+# Every warning is an error (SPEC 0087): a rule that does not fit the project is turned off here, with its reason.
+
+# Static factories on PagedResult<T> read better than a second, non-generic type.
+dotnet_diagnostic.CA1000.severity = none
+# "from" and "to" are keywords only for Visual Basic callers.
+dotnet_diagnostic.CA1716.severity = none
+# DisplayFormat.Decimal formats decimals; the name is what it does.
+dotnet_diagnostic.CA1720.severity = none
+# A few log lines per request: source-generated delegates would cost more in readability than they save.
+dotnet_diagnostic.CA1848.severity = none
+dotnet_diagnostic.CA1873.severity = none
+# Private members keep read-only interfaces on purpose: they say the collection is not modified.
+dotnet_diagnostic.CA1859.severity = none
+# The name of the exception is the field of the request, which is what the client reads.
+dotnet_diagnostic.CA2208.severity = none
+
+# The token sits before the optional arguments added later; moving it touches every caller.
+[src/Application/Services/DriverAllocationService.cs]
+dotnet_diagnostic.CA1068.severity = none
+
+[src/Infrastructure/Persistence/Migrations/**.cs]
+generated_code = true
+
+[Tests/**.cs]
+# Convention: Method_Scenario_Result.
+dotnet_diagnostic.CA1707.severity = none
+# xUnit calls IAsyncLifetime.DisposeAsync.
+dotnet_diagnostic.CA1001.severity = none
+# xUnit names them collections.
+dotnet_diagnostic.CA1711.severity = none
+# An inline expected array is clearer than a field far from the assert.
+dotnet_diagnostic.CA1861.severity = none
+
+[*.{ts,tsx,js,json,yml,yaml,css,html}]
+indent_size = 2
+
+[*.md]
+trim_trailing_whitespace = false
+
+[*.{csproj,props}]
+indent_size = 2

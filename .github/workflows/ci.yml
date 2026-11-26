@@ -1,0 +1,183 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "specs/**"
+      - ".claude/**"
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "specs/**"
+      - ".claude/**"
+
+# Only the last push of a branch matters.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restore
+        run: dotnet restore DispatchGuard.slnx
+
+      - name: Build
+        run: dotnet build DispatchGuard.slnx --no-restore -c Release
+
+      - name: Unit tests
+        run: dotnet test DispatchGuard.slnx --no-build -c Release --filter "Category!=Integration" --logger "trx;LogFilePrefix=unit"
+
+      # Testcontainers starts PostgreSQL with the Docker of the runner.
+      - name: Integration tests (PostgreSQL)
+        run: dotnet test Tests/Infrastructure.Tests/Infrastructure.Tests.csproj --no-build -c Release --filter "Category=Integration" --logger "trx;LogFilePrefix=integration"
+
+      - name: Vulnerable packages
+        run: |
+          dotnet list DispatchGuard.slnx package --vulnerable --include-transitive | tee vulnerable.txt
+          if grep -q "has the following vulnerable packages" vulnerable.txt; then
+            echo "::error::There are NuGet packages with known vulnerabilities"; exit 1
+          fi
+
+      # Web of the dispatcher (SPEC 0037): tests of the UI rules and TypeScript build.
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Web (npm ci, audit, lint, test, build)
+        working-directory: web
+        run: |
+          npm ci --no-audit --no-fund
+          npm audit --audit-level=moderate
+          npm run lint
+          npm test -- --reporter=default --reporter=junit --outputFile.junit=reports/vitest.xml
+          npm run build
+
+      - name: Test summary
+        if: always()
+        run: |
+          python3 .github/scripts/test_summary.py ${{ job.status == 'success' && '--require-tests' || '' }} \
+            ".NET unit=Tests/**/TestResults/unit*.trx" \
+            ".NET integration (PostgreSQL)=Tests/**/TestResults/integration*.trx" \
+            "Web unit (Vitest)=web/reports/vitest.xml" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: test-results
+          path: |
+            Tests/**/TestResults/*.trx
+            web/reports/vitest.xml
+
+  # What the deployed application is made of, for whoever audits it (SPEC 0099). Runtime dependencies only: no test projects
+  # and no npm dev dependencies, since neither reaches the image.
+  sbom:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: .NET SBOM (CycloneDX)
+        run: |
+          dotnet tool restore
+          dotnet dotnet-CycloneDX src/Web.Api/Web.Api.csproj --recursive --exclude-test-projects \
+            --output sbom --filename dotnet.cdx.json --output-format Json --set-name fleet-dispatchguard-api
+
+      - name: npm SBOM (CycloneDX)
+        working-directory: web
+        run: |
+          npm ci --no-audit --no-fund
+          npx --yes @cyclonedx/cyclonedx-npm@6.0.1 --omit dev --output-format JSON --output-file ../sbom/web.cdx.json
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: sbom
+          path: sbom/
+
+  # The image as it will be deployed (SPEC 0091): its own checks, the E2E of the web (SPEC 0044) and OWASP ZAP against it.
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: build-and-test
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Image
+        run: docker build -t dispatchguard:ci .
+
+      - name: Container against PostgreSQL (limited user, migrations, demo, --check)
+        run: |
+          echo "127.0.0.1 dispatchguard.test" | sudo tee -a /etc/hosts
+          WEEK="$(node -e "import('./web/e2e/week.ts').then(week => console.log(week.iso(week.nextMonday())))")"
+          DISPATCHGUARD_IMAGE=dispatchguard:ci WEEK="$WEEK" bash deploy/test/start.sh
+
+      - name: Playwright
+        working-directory: web
+        env:
+          E2E_BASE_URL: https://dispatchguard.test:8443
+        run: |
+          npm ci --no-audit --no-fund
+          npx playwright install --with-deps chromium
+          npx playwright test
+
+      - name: OWASP ZAP baseline
+        run: |
+          set -o pipefail
+          # The user of the ZAP image writes the report.
+          mkdir -p deploy/test/zap && chmod 777 deploy/test/zap
+          docker compose -f deploy/test/compose.yml run --rm zap
+          python3 .github/scripts/zap_gate.py deploy/test/zap/report.json | tee -a "$GITHUB_STEP_SUMMARY"
+
+      - name: Logs of the containers
+        if: failure()
+        run: docker compose -f deploy/test/compose.yml logs --tail 200 app proxy
+
+      - name: Test summary
+        if: always()
+        run: |
+          python3 .github/scripts/test_summary.py ${{ job.status == 'success' && '--require-tests' || '' }} \
+            "Web E2E (Playwright)=web/reports/playwright.xml" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: playwright-report
+          path: |
+            web/playwright-report
+            web/reports/playwright.xml
+            deploy/test/zap/report.json

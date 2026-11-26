@@ -1,0 +1,9 @@
+{
+	admin off
+	auto_https off
+}
+
+https://dispatchguard.test:{$DISPATCHGUARD_PORT} {
+	tls /certs/cert.pem /certs/key.pem
+	reverse_proxy app:8080
+}

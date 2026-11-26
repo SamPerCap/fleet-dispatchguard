@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>DispatchGuard.SampleData</RootNamespace>
+    <AssemblyName>DispatchGuard.SampleData</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DemoData\DemoData.csproj" />
+  </ItemGroup>
+
+</Project>

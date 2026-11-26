@@ -1,0 +1,78 @@
+# The image as it will be deployed, with what its host puts around it: an HTTPS proxy in front and a database that may not be there yet.
+# Used by start.sh, which writes the .env with the passwords. Nothing here keeps data.
+name: dispatchguard-test
+
+services:
+  database:
+    image: postgres:17@sha256:87c8b42f423b45d5247e6aa8fdb2e7762fec164c68a50fe3eb07e7bfcaf4dbcf
+    environment:
+      POSTGRES_PASSWORD: ${OWNER_PASSWORD}
+    volumes:
+      - ../sql:/sql:ro
+
+  migrations:
+    image: ${DISPATCHGUARD_IMAGE}
+    profiles: [tools]
+    entrypoint: ["/app/migrations/apply"]
+    command: ["--connection", "Host=database;Database=DispatchGuard;Username=postgres;Password=${OWNER_PASSWORD}"]
+
+  app:
+    image: ${DISPATCHGUARD_IMAGE}
+    environment:
+      ConnectionStrings__DispatchGuardDb: Host=database;Database=DispatchGuard;Username=lof_app;Password=${APPLICATION_PASSWORD}
+      AllowedHosts: dispatchguard.test
+      ForwardedHeaders__TrustedNetworks__0: ${DISPATCHGUARD_SUBNET:-172.30.91.0/24}
+      Session__Key: ${SESSION_KEY}
+      CRON_SECRET: ${CRON_SECRET}
+      Demo__ResetKey: ${RESET_KEY}
+      Demo__LockMasterDataDeletion: "true"
+      # A whole suite of tests comes from one address; that the limits work is tested in .NET (SPEC 0089).
+      RateLimiting__Session__Reads: 100000
+      RateLimiting__Session__Writes: 100000
+      RateLimiting__Session__Heavy: 100000
+      RateLimiting__Session__VisitBatches: 100000
+      RateLimiting__Ip__Total: 100000
+      RateLimiting__Ip__Heavy: 100000
+      RateLimiting__Ip__NewSessions: 100000
+      Logging__LogLevel__Default: Warning
+    # What it does not need, so that it is known that it does not.
+    read_only: true
+    tmpfs: [/tmp]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+
+  proxy:
+    image: caddy:2-alpine@sha256:003a97808e781aa9f7e75cc2f43d34d461099031faf5e20faefb9f61126836f0
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certs:/certs:ro
+    ports:
+      - "127.0.0.1:${DISPATCHGUARD_PORT:-8443}:${DISPATCHGUARD_PORT:-8443}"
+    environment:
+      DISPATCHGUARD_PORT: ${DISPATCHGUARD_PORT:-8443}
+    networks:
+      default:
+        aliases: [dispatchguard.test]
+
+  sample-data:
+    image: ${DISPATCHGUARD_IMAGE}
+    profiles: [tools]
+    environment:
+      SSL_CERT_FILE: /certs/cert.pem
+    volumes:
+      - ./certs:/certs:ro
+    entrypoint: ["dotnet", "/app/sample-data/DispatchGuard.SampleData.dll", "--api", "https://dispatchguard.test:${DISPATCHGUARD_PORT:-8443}"]
+
+  zap:
+    image: ghcr.io/zaproxy/zaproxy:stable@sha256:9624669db72f54d86c4b46a7064518bd9bf79d8c61a4c31befa9923489f328af
+    profiles: [tools]
+    volumes:
+      - ./zap:/zap/wrk
+    # -I: what fails is decided by .github/scripts/zap_gate.py, which knows the risk of each alert.
+    command: ["zap-baseline.py", "-t", "https://dispatchguard.test:${DISPATCHGUARD_PORT:-8443}", "-I", "-J", "report.json"]
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: ${DISPATCHGUARD_SUBNET:-172.30.91.0/24}

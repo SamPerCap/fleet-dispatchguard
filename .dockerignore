@@ -1,0 +1,28 @@
+# Only what the image is built from: what is not named here never reaches the builder.
+*
+!global.json
+!Directory.Build.props
+!.editorconfig
+!src/Core
+!src/DemoData
+!src/Application
+!src/Infrastructure
+!src/Web.Api
+!tools/SampleData
+!web
+
+# Local files: secrets, and the output of other builds.
+**/appsettings.*.json
+**/.env*
+**/*.user
+**/*.secrets.json
+**/bin
+**/obj
+**/node_modules
+**/launchSettings.json
+web/dist
+web/e2e
+web/reports
+web/test-results
+web/playwright-report
+web/*.tsbuildinfo

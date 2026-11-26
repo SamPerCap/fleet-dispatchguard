@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>DispatchGuard.DemoData</RootNamespace>
+    <AssemblyName>DispatchGuard.DemoData</AssemblyName>
+  </PropertyGroup>
+
+  <!-- Only for the request/response records of the API (SPEC 0038); the seeder talks HTTP. -->
+  <ItemGroup>
+    <ProjectReference Include="..\Application\Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="DispatchGuard.Core.Exceptions" />
+    <Using Include="DispatchGuard.Core.Localization" />
+  </ItemGroup>
+
+</Project>

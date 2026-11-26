@@ -1,0 +1,26 @@
+{
+  "stryker-config": {
+    "project": "Core.csproj",
+    "test-projects": [
+      "Core.Tests.csproj"
+    ],
+    "mutate": [
+      "**/ValueObjects/LegalComplianceEvaluation.cs",
+      "**/ValueObjects/LaterServicesEvaluation.cs",
+      "**/ValueObjects/DrivingWeek.cs",
+      "**/ValueObjects/DrivingPeriod.cs",
+      "**/ValueObjects/DriverAvailability.cs"
+    ],
+    "reporters": [
+      "progress",
+      "html",
+      "json"
+    ],
+    "thresholds": {
+      "high": 90,
+      "low": 80,
+      "break": 0
+    },
+    "additional-timeout": 30000
+  }
+}

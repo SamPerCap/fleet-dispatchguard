@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="16.3.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- SPEC 0062: the in-memory repositories are compared with the database ones. -->
+    <InternalsVisibleTo Include="Infrastructure.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="DispatchGuard.Core.Exceptions" />
+    <Using Include="DispatchGuard.Core.Localization" />
+  </ItemGroup>
+
+</Project>

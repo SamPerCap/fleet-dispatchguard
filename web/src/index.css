@@ -1,0 +1,222 @@
+/* Single source of the design tokens; Tailwind exposes them in tailwind.config.js.
+   Guide and calculated AA contrasts: docs/design-system.md. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* ---- Brand palette (RGB, so that /alpha can be used) ---- */
+  --navy: 16 27 48;          /* #101B30 navigation and identity */
+  --blue: 36 99 235;         /* #2463EB ONLY main action, selection and focus. White on it 5.17:1 */
+  --blue-ink: 29 79 208;     /* #1D4FD0 blue text on light: 6.81:1 */
+  --success: 22 163 106;     /* #16A36A fill/indicator (3.24:1, never as text) */
+  --success-ink: 14 122 78;  /* #0E7A4E text: 5.37:1 on surface, 4.82:1 on success-soft */
+  --warning: 217 149 36;     /* #D99524 fill/indicator (2.54:1, never as text nor as a lone icon) */
+  --warning-ink: 143 91 10;  /* #8F5B0A text: 5.72:1 on surface, 5.24:1 on warning-soft */
+  --critical: 217 71 71;     /* #D94747 ONLY what is really critical; fill/indicator */
+  --critical-ink: 184 48 47; /* #B8302F text: 6.00:1 on surface, 5.27:1 on critical-soft */
+  --critical-strong: 158 39 38; /* #9E2726 hover of the critical button: white 7.6:1 */
+  /* Soft backgrounds = base colour at 10 % on white, precalculated so that the contrast is exact. */
+  --success-soft: 232 246 240; /* #E8F6F0 */
+  --warning-soft: 251 244 233; /* #FBF4E9 */
+  --critical-soft: 251 237 237; /* #FBEDED */
+  --blue-soft: 233 239 253;    /* #E9EFFD (selection) */
+  --navy-soft: 228 234 243;    /* #E4EAF3 bluish neutral background: navy 15.0:1 */
+  --navy-tint: 201 213 234;    /* #C9D5EA assigned service in strip and timeline (visible on white); ink 11.62:1 */
+
+  /* ---- Navy surface: focal blocks (engine, efficiency) and sidebar ---- */
+  --navy-2: 23 42 77;          /* #172A4D end of the navy gradient */
+  --on-navy: 255 255 255;      /* main text on navy: 17.19:1 (14.24:1 on navy-2) */
+  --on-navy-2: 169 182 204;    /* #A9B6CC secondary on navy: 8.4:1 · 6.95:1 on navy-2 */
+  /* Accents on navy (charts, figures): all ≥ 5:1 on #101B30 */
+  --blue-bright: 110 160 255;    /* #6EA0FF 6.66:1 */
+  --success-bright: 52 195 143;  /* #34C38F 7.65:1 */
+  --warning-bright: 242 181 68;  /* #F2B544 9.39:1 */
+  --critical-bright: 255 122 122;/* #FF7A7A 6.81:1 */
+
+  /* ---- Surfaces by level (instead of borders) ---- */
+  --bg: 242 245 250;         /* #F2F5FA level 0: app canvas */
+  --surface: 255 255 255;    /* #FFFFFF level 1: modules */
+  --sunken: 247 249 252;     /* #F7F9FC level 2: areas inside a module */
+  --line: 227 232 240;       /* #E3E8F0 thin separators (not frames) */
+
+  /* ---- Text ---- */
+  --ink: 16 27 48;           /* main = navy: 17.19:1 surface, 15.73:1 bg */
+  --ink-2: 71 82 102;        /* #475266 secondary: 7.87:1 surface, 7.21:1 bg */
+  --ink-3: 91 102 122;       /* #5B667A tertiary (minimum allowed): 5.79:1 surface, 5.30:1 bg */
+
+  /* ---- Neutrals and sidebar ---- */
+  --muted: 238 242 247;      /* #EEF2F7 chips, segment tracks, skeletons */
+  --side-fg: 199 208 224;    /* #C7D0E0 text of the navy sidebar: 11.07:1 */
+  --side-muted: 142 154 178; /* #8E9AB2 secondary of the sidebar: 6.07:1 on navy, 5.03:1 on navy-2 */
+
+  /* ---- Shape, shadow and motion ---- */
+  --radius-sm: 8px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --shadow-1: 0 1px 2px rgb(16 27 48 / 0.04), 0 4px 16px -4px rgb(16 27 48 / 0.07), 0 0 0 1px rgb(16 27 48 / 0.03);
+  --shadow-2: 0 2px 4px rgb(16 27 48 / 0.05), 0 12px 32px -8px rgb(16 27 48 / 0.14), 0 0 0 1px rgb(16 27 48 / 0.04);
+  --shadow-navy: 0 12px 32px -10px rgb(16 27 48 / 0.45);
+  --shadow-pop: 0 8px 24px rgb(16 27 48 / 0.14), 0 0 0 1px rgb(16 27 48 / 0.06);
+  --ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ---- Fluid layout ---- */
+  --gutter: clamp(24px, 2.5vw, 48px); /* canvas side margin: 32 px at 1280, 36 at 1440, 48 from 1920 */
+  --page-max: 2400px;                 /* high cap: at ≤ 2560 px it never applies (sidebar 240 + 2 × 48 leaves 2224) */
+  --topbar-h: 56px;
+  color-scheme: light;
+}
+@media (max-width: 639px) { :root { --gutter: 16px; } }
+
+@layer base {
+  /* scrollIntoView and anchors leave room for the sticky header. */
+  html { -webkit-text-size-adjust: 100%; scroll-padding-top: calc(var(--topbar-h) + 8px); }
+  body {
+    @apply bg-bg text-ink font-sans antialiased;
+    /* Not fixed, so it does not repaint on scroll. */
+    background-image: radial-gradient(1400px 520px at 72% -180px, rgb(var(--blue) / 0.07), transparent 70%);
+    background-repeat: no-repeat;
+    font-size: 14px; line-height: 20px;
+    font-variant-numeric: tabular-nums; font-feature-settings: 'tnum' 1, 'cv11' 1;
+  }
+  :focus-visible { outline: 2px solid rgb(var(--blue)); outline-offset: 2px; border-radius: var(--radius-sm); }
+  .on-navy :focus-visible, .surface-navy :focus-visible { outline-color: rgb(255 255 255); }
+}
+
+@layer components {
+  /* ---- Buttons: one primary per context. Clickable area ≥ 44 px (.btn::after). ---- */
+  .btn {
+    @apply relative inline-flex h-9 select-none items-center justify-center gap-2 whitespace-nowrap rounded-md border border-line bg-surface px-4 text-sm font-medium text-ink;
+    transition: background-color 120ms var(--ease), border-color 120ms var(--ease), color 120ms var(--ease);
+  }
+  .btn::after { content: ''; position: absolute; left: 50%; top: 50%; width: max(100%, 44px); height: max(100%, 44px); transform: translate(-50%, -50%); }
+  .btn:hover { @apply border-[rgb(var(--ink-3)/0.35)] bg-sunken; }
+  .btn:disabled { @apply cursor-not-allowed opacity-50; }
+  .btn:active:not(:disabled) { transform: translateY(0.5px); }
+  .btn-primary { @apply border-blue bg-blue text-white; }
+  .btn-primary:hover { @apply border-blue-ink bg-blue-ink; }
+  /* Strong button of a critical priority: only one per screen. White on critical-ink 6.00:1. */
+  .btn-danger { @apply border-critical-ink bg-critical-ink text-white; }
+  .btn-danger:hover { @apply border-critical-strong bg-critical-strong; }
+  .btn-secondary { /* = .btn */ }
+  .btn-link { @apply h-8 border-transparent bg-transparent px-2 font-semibold text-blue-ink; }
+  .btn-link:hover { @apply border-transparent bg-blue-soft; }
+  .btn-text, .btn-ghost { @apply border-transparent bg-transparent px-2 text-ink-2; }
+  .btn-text:hover, .btn-ghost:hover { @apply border-transparent bg-sunken text-ink; }
+  .btn-sm { @apply h-8 px-3 text-[13px]; }
+  .btn-icon { @apply h-8 w-8 px-0; }
+
+  /* ---- Surfaces ---- */
+  .module { @apply min-w-0 rounded-lg bg-surface p-6; box-shadow: var(--shadow-1); }
+  .surface-navy { @apply text-white; background: linear-gradient(160deg, rgb(var(--navy)) 0%, rgb(var(--navy-2)) 100%); box-shadow: var(--shadow-navy); }
+  .surface-navy .module-title { @apply text-white; }
+  .surface-navy .hint { color: rgb(var(--on-navy-2)); }
+  .surface-navy .hint:hover { color: rgb(var(--on-navy)); }
+  /* Text contrast is measured on critical-soft. */
+  .surface-critical { background: linear-gradient(180deg, rgb(var(--critical-soft)) 0%, rgb(var(--surface)) 100%); box-shadow: var(--shadow-1), inset 0 0 0 1px rgb(var(--critical) / 0.18); }
+  .raised { box-shadow: var(--shadow-2); }
+  .module-title { @apply text-module font-semibold text-ink; }
+  .card { @apply rounded-lg bg-surface; box-shadow: var(--shadow-1); }
+  .card-title { @apply mb-4 flex items-center gap-2 text-module font-semibold text-ink; }
+  .well { @apply rounded-md bg-sunken; }
+  /* Clickable surface: motion only as a response, never on its own. */
+  .lift { transition: box-shadow 160ms var(--ease); }
+  .lift:hover, .lift:focus-within { box-shadow: var(--shadow-2); }
+
+  /* ---- Fluid layout ---- */
+  .gutter-x { padding-inline: var(--gutter); }
+  .page { width: 100%; max-width: var(--page-max); margin-inline: auto; }
+  .topbar {
+    position: sticky; top: 0; z-index: 30; height: var(--topbar-h);
+    background: rgb(var(--bg) / 0.72); -webkit-backdrop-filter: saturate(1.4) blur(12px); backdrop-filter: saturate(1.4) blur(12px);
+    box-shadow: 0 1px 0 rgb(var(--line) / 0); transition: box-shadow 160ms var(--ease), background-color 160ms var(--ease);
+  }
+  .topbar[data-scrolled='true'] { background: rgb(var(--bg) / 0.8); box-shadow: 0 1px 0 rgb(var(--line)), 0 8px 24px -16px rgb(16 27 48 / 0.18); }
+  .kbd { @apply inline-flex h-5 min-w-[20px] items-center justify-center rounded-[5px] border border-line bg-surface px-1 font-sans text-xs font-medium text-ink-3; }
+
+  /* ---- Controls ---- */
+  .chip { @apply inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-ink-2; }
+  .input { @apply h-9 rounded-md border border-line bg-surface px-3 text-sm text-ink; }
+  .input:hover { @apply border-[rgb(var(--ink-3)/0.45)]; }
+  textarea.input { @apply h-auto py-2; }
+  .label { @apply text-xs font-medium text-ink-2; }
+  .eyebrow { @apply text-xs font-medium text-ink-3; }
+  .seg { @apply inline-flex rounded-md bg-muted p-0.5; }
+  .seg > button { @apply relative h-8 rounded-[5px] px-3 text-[13px] font-medium text-ink-2; }
+  .seg > button::after { content: ''; position: absolute; left: 50%; top: 50%; width: max(100%, 44px); height: 44px; transform: translate(-50%, -50%); }
+  .seg > button:hover { @apply text-ink; }
+  .seg > button[data-state='on'], .seg > button[data-state='active'], .seg > button[aria-pressed='true'] { @apply bg-surface text-blue-ink; box-shadow: var(--shadow-1); }
+
+  /* ---- Tones (AA text on their soft background) ---- */
+  .tone-ok { @apply bg-success-soft text-success-ink; }
+  .tone-warn { @apply bg-warning-soft text-warning-ink; }
+  .tone-danger { @apply bg-critical-soft text-critical-ink; }
+  .tone-muted { @apply bg-muted text-ink-2; }
+  .tone-navy { @apply bg-navy text-white; }
+
+  /* ---- Table ---- */
+  .tbl { @apply w-full border-separate border-spacing-0 text-left; }
+  .tbl thead th { @apply sticky top-0 z-[1] whitespace-nowrap border-b border-line bg-surface px-4 py-3 text-xs font-medium text-ink-3; }
+  .tbl tbody td, .tbl tbody th { @apply border-b border-line px-4 py-3 align-middle; }
+  .tbl tbody tr:last-child > * { @apply border-b-0; }
+  .tbl tbody tr { transition: background-color 120ms var(--ease); }
+  .tbl tbody tr:hover { @apply bg-sunken; }
+
+  /* ---- Loading skeleton: no animated shimmer (no constant motion) ---- */
+  .skeleton { @apply rounded-md bg-muted; }
+}
+
+/* Time strip blocks, one look per status. */
+@layer components {
+  .blk {
+    @apply absolute inset-y-1 flex items-center gap-1.5 overflow-hidden whitespace-nowrap rounded-[5px] px-2 text-xs font-medium;
+    transition: box-shadow 120ms var(--ease);
+  }
+  .blk:hover, .blk:focus-visible { box-shadow: 0 0 0 2px rgb(var(--blue)); z-index: 2; }
+  .blk-assigned { @apply bg-navy-tint text-ink; }
+  .blk-running { @apply bg-navy text-white; }
+  .blk-completed { @apply bg-muted text-ink-3; }
+  .blk-uncovered { @apply border border-dashed border-critical text-critical-ink; background: repeating-linear-gradient(135deg, rgb(var(--critical) / .10) 0 6px, rgb(var(--surface)) 6px 12px); }
+  .blk-forced { box-shadow: inset 3px 0 0 rgb(var(--warning)); }
+  /* ---- Absences of the agenda in the timeline: hatched, so that they are not told by colour alone ---- */
+  .agenda-band {
+    background: repeating-linear-gradient(135deg, rgb(var(--warning) / .20) 0 5px, rgb(var(--warning) / .05) 5px 10px);
+    box-shadow: inset 0 0 0 1px rgb(var(--warning) / .45);
+  }
+  .blk-clip-start { @apply rounded-l-none; }
+  .blk-clip-end { @apply rounded-r-none; }
+}
+
+/* Runs only when a view mounts, never when its data refreshes.
+   `backwards` leaves no transform behind (it would break position: fixed and create stacking contexts). */
+@keyframes brand-enter { from { opacity: 0; transform: translateY(6px); } }
+.page > * { animation: brand-enter 240ms var(--ease) backwards; }
+.page > :nth-child(2) { animation-delay: 40ms; }
+.page > :nth-child(3) { animation-delay: 80ms; }
+.page > :nth-child(4) { animation-delay: 120ms; }
+.page > :nth-child(5) { animation-delay: 160ms; }
+.page > :nth-child(n+6) { animation-delay: 200ms; }
+@keyframes brand-pop { from { opacity: 0; transform: translateY(-4px) scale(0.985); } }
+.palette-pop { animation: brand-pop 160ms var(--ease) backwards; }
+@keyframes brand-fade { from { opacity: 0; } }
+.fade-in { animation: brand-fade 160ms var(--ease) backwards; }
+
+/* The wait for the database: the only motion that does not stop, because nothing else happens meanwhile. */
+.traffic { position: relative; align-self: stretch; margin-inline: -24px; height: 60px; overflow: hidden; border-bottom: 3px dashed rgb(var(--line)); }
+.traffic-vehicle { position: absolute; bottom: 4px; left: 0; animation: brand-drive linear infinite; }
+.traffic-bounce, .traffic-bounce > svg { display: block; }
+.traffic-bounce { animation: brand-bounce 520ms ease-in-out infinite; }
+.traffic-wheel { animation: brand-roll 700ms linear infinite; }
+@keyframes brand-drive { from { transform: translateX(-100%); } to { transform: translateX(100vw); } }
+@keyframes brand-bounce { 50% { transform: translateY(-1.5px); } }
+@keyframes brand-roll { to { transform: rotate(360deg); } }
+
+/* No other constant motion; none at all if the system asks to reduce it. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+  /* With `backwards`, a delay would keep the block invisible during its step. */
+  .page > *, .palette-pop, .fade-in { animation: none !important; }
+  /* Without motion, the vehicles would pile up at one end. */
+  .traffic { display: none; }
+}
