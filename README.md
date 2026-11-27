@@ -97,6 +97,8 @@ npm --prefix web run lint && npm --prefix web test
     ([ADR 0022](docs/adr/0022-perimeter.md)).
 - **React + TypeScript web** (Vite) in `web/`, with no Gantt library: legality is always decided by the backend
   ([ADR 0011](docs/adr/0011-web-react-sin-librerias-pesadas.md)). English by default, Spanish on request.
+- **One repository** for the API and the web, on purpose: one deployment, one origin, changes that land whole
+  ([ADR 0027](docs/adr/0027-one-repository.md)).
 - **One container** that serves the API and the web ([ADR 0023](docs/adr/0023-cloud-ready.md)), deployed as described in
   [ADR 0025](docs/adr/0025-public-deployment.md).
 - **Tests**: xUnit with hand-written fakes for the rules, integration tests against a real PostgreSQL 17 (Testcontainers),

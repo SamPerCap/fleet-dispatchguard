@@ -30,3 +30,4 @@ Decisions already taken, one per file (Context · Decision · Consequences · Or
 | [0024](0024-postgresql.md) | PostgreSQL in the place of SQL Server: instants, case and accents, locks |
 | [0025](0025-public-deployment.md) | Public deployment: nothing without a session, a daily rebuild and a release by hand |
 | [0026](0026-audit-trail.md) | Audit trail: in the transaction, append only, and never wakes the database on its own |
+| [0027](0027-one-repository.md) | One repository for the API and the web: one deployment, one origin, changes that land whole |
