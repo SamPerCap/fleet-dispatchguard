@@ -23,7 +23,7 @@ export function Cover() {
         </span>
         <LanguageSwitch />
       </header>
-      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-12">
+      <main className="mx-auto w-full max-w-screen-2xl flex-1 px-4 py-8 sm:px-12">
         <h1 className="max-w-4xl text-page font-bold text-ink sm:text-display">{text.title}</h1>
         <p className="mt-5 max-w-2xl text-module text-ink-2">{text.problem}</p>
         <div className="mt-8 flex flex-wrap gap-3">

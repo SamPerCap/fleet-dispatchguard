@@ -1,6 +1,5 @@
-// The public repository does not exist yet: SPEC 0099 creates it and fills this line. While it is empty the pages say that the
-// code will be published and link nowhere, so a reader never meets a broken link (SPEC 0096 R5).
-export const REPOSITORY_URL = '';
+// An empty value makes the pages say that the code will be published and link nowhere, so a reader never meets a broken link.
+export const REPOSITORY_URL = 'https://github.com/SamPerCap/fleet-dispatchguard';
 
 /** Where a file of the repository can be read, or null while there is no public repository. */
 export function sourceUrl(path: string, repository = REPOSITORY_URL): string | null {

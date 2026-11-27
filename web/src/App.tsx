@@ -64,24 +64,24 @@ const NAV: { id: Page; label: string; icon: JSX.Element; group?: string; keyword
  */
 const LABEL_OUT_OF_NAV: Partial<Record<Page, string>> = { get rules() { return t.app.rules; }, get audit() { return t.app.access; } };
 const navOf = (page: Page): Page => (page === 'rules' ? 'engine' : page);
-const GROUP_OF = (() => {
-  const groups = new Map<Page, string>();
-  let group = '';
+// Read when asked, never when the module loads: the texts arrive in parallel with this chunk, and the language can change later.
+function groupOf(page: Page): string | undefined {
+  let group: string | undefined;
   for (const item of NAV) {
     group = item.group ?? group;
-    groups.set(item.id, group);
+    if (item.id === page) return group;
   }
-  return groups;
-})();
+  return undefined;
+}
 const labelOf = (page: Page) => LABEL_OUT_OF_NAV[page] ?? NAV.find(n => n.id === page)!.label;
 /** `keywords` let the palette find a view by words that are not in its label. */
 const VIEW_ITEMS: PaletteItem[] = [
   ...NAV.map(item => ({
     kind: 'view' as const,
     target: item.id,
-    label: item.label,
-    detail: GROUP_OF.get(item.id),
-    keywords: item.keywords ?? '',
+    get label() { return item.label; },
+    get detail() { return groupOf(item.id); },
+    get keywords() { return item.keywords ?? ''; },
   })),
   { kind: 'view', target: 'rules', get label() { return t.app.rules; }, get detail() { return t.app.compliance; }, get keywords() { return t.app.rulesWords; } },
 ];
@@ -165,7 +165,9 @@ export function App({ offerTour, language }: { offerTour: boolean; language: str
   useEffect(() => {
     history.replaceState(history.state, '', `#${page}`);
   }, [page]);
-  useEffect(() => visit.screen(screenName(page)), [page]);
+  useEffect(() => {
+    visit.screen(screenName(page));
+  }, [page]);
   useEffect(listenToVisit, []);
   // Every view starts at the top. The views that focus something (catalogue group, card) do it later, once their data is loaded.
   useEffect(() => {
@@ -469,7 +471,7 @@ function TopBar({ page, onSearch, menuOpen, onMenu }: { page: Page; onSearch: ()
     addEventListener('scroll', onScroll, { passive: true });
     return () => removeEventListener('scroll', onScroll);
   }, []);
-  const trail = [GROUP_OF.get(navOf(page)), ...(page === 'rules' ? [labelOf('engine')] : []), labelOf(page)].filter(Boolean) as string[];
+  const trail = [groupOf(navOf(page)), ...(page === 'rules' ? [labelOf('engine')] : []), labelOf(page)].filter(Boolean) as string[];
   const mac = isMac();
   return (
     <header className="topbar gutter-x" data-scrolled={scrolled}>

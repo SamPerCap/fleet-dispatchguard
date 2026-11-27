@@ -360,7 +360,9 @@ function EntryForm({
   const titleId = useId();
   const errorId = useId();
   const firstField = useRef<HTMLSelectElement>(null);
-  useEffect(() => firstField.current?.focus(), []);
+  useEffect(() => {
+    firstField.current?.focus();
+  }, []);
   const period = periodOf(form, original);
   const [affected, retryAffected] = useAffected(kind, id, period, version);
   const { busy, error, run } = useSave(onChanged);

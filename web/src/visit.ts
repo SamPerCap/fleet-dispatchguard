@@ -191,5 +191,7 @@ export function listenToVisit(): () => void {
 }
 
 export function useFormVisit(name: string): void {
-  useEffect(() => visit.openForm(name), [name]);
+  useEffect(() => {
+    visit.openForm(name);
+  }, [name]);
 }

@@ -1,5 +1,4 @@
 // Only what can be seen in the demo, or is explained with its reason (SPEC 0093 R5). Figures are counted by the build, never here.
-import type { GuideId } from './author';
 import type { EvidenceId } from './measurements';
 
 export interface Point {
@@ -44,6 +43,8 @@ export interface ShowcaseText {
     intro: string;
     sections: EngineeringSection[];
   };
+  loading: string;
+  pageFailed: string;
   appFailed: string;
   tryAgain: string;
 }
@@ -63,23 +64,21 @@ export interface AllocationFlowText {
   caption: string;
 }
 
+export interface TechnologyGroup {
+  group: string;
+  items: string[];
+}
+
 export interface AboutText {
   back: string;
   title: string;
   contact: string;
   story: string[];
-  examplesIntro: string;
-  examples: Point[];
-  architecture: { title: string; intro: string; points: Point[]; technologies: string };
+  architecture: { title: string; intro: string; points: Point[]; technologies: TechnologyGroup[] };
   ai: {
     title: string;
     intro: string;
     parts: Point[];
-    coauthorship: (coauthored: number, total: number, commit: string, countedOn: string) => string;
-    guidesTitle: string;
-    guidesIntro: string;
-    follows: Record<GuideId, string>;
-    published: (date: string) => string;
   };
   code: { title: string; pending: string; link: string };
 }

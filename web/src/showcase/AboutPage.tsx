@@ -3,25 +3,23 @@ import { useEffect } from 'react';
 import { BRAND } from '../brand';
 import { BrandMark } from '../brand/BrandArt';
 import { LanguageSwitch } from '../LanguageSwitch';
-import { locale } from '../language';
 import { START_HASH } from '../route';
-import { AUTHOR, COAUTHORSHIP, GUIDES } from './author';
-import { dateOf } from './measurements';
+import { AUTHOR } from './author';
 import { REPOSITORY_URL } from './repository';
 import { showcaseText } from './showcaseText';
-import type { Point } from './text';
+import type { Point, TechnologyGroup } from './text';
 
-const monthOf = (isoMonth: string) =>
-  new Date(`${isoMonth}-15T12:00:00Z`).toLocaleDateString(locale(), { month: 'long', year: 'numeric', timeZone: 'UTC' });
-
-/** Who made it and how AI was used: only what the author wrote or approved (SPEC 0096 R4–R6). Asks nothing of the server. */
+/** Who made it and how AI was used: only what the author wrote or approved (SPEC 0096 R4, SPEC 0100 R1). Asks nothing of the server. */
 export function AboutPage() {
   const { tagline, about: text, cover } = showcaseText();
-  useEffect(() => scrollTo({ top: 0 }), []);
+  // In a block: browsers now return a Promise from scrollTo, and React would call it as the cleanup (TypeError on Back).
+  useEffect(() => {
+    scrollTo({ top: 0 });
+  }, []);
   return (
     <div className="min-h-screen">
       <header className="on-navy bg-gradient-to-br from-navy to-navy-2 px-4 py-10 text-white sm:px-12">
-        <div className="mx-auto max-w-4xl">
+        <div className="mx-auto max-w-screen-2xl">
           <div className="flex items-center justify-between gap-3">
             <a href="#" className="inline-flex h-11 items-center gap-2 text-data font-medium text-side-fg hover:text-white">
               <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -45,38 +43,20 @@ export function AboutPage() {
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-4xl space-y-10 px-4 py-10 sm:px-12">
+      <main className="mx-auto max-w-screen-2xl space-y-10 px-4 py-10 sm:px-12">
         <section className="space-y-4">
           {text.story.map(paragraph => (
             <p key={paragraph} className="max-w-3xl text-module text-ink-2">
               {paragraph}
             </p>
           ))}
-          <p className="max-w-3xl text-module font-semibold text-ink">{text.examplesIntro}</p>
-          <Points points={text.examples} />
         </section>
         <section aria-labelledby="ai">
           <h2 id="ai" className="text-[22px] font-bold leading-7 text-ink">
             {text.ai.title}
           </h2>
           <p className="mt-2 max-w-3xl text-module text-ink-2">{text.ai.intro}</p>
-          <Points points={text.ai.parts} />
-          <p className="module mt-4 text-data text-ink-2">
-            {text.ai.coauthorship(COAUTHORSHIP.coauthored, COAUTHORSHIP.total, COAUTHORSHIP.commit, dateOf(COAUTHORSHIP.countedOn))}
-          </p>
-          <h3 className="mt-6 text-module font-semibold text-ink">{text.ai.guidesTitle}</h3>
-          <p className="mt-1 text-data text-ink-2">{text.ai.guidesIntro}</p>
-          <ul className="mt-3 space-y-3">
-            {GUIDES.map(guide => (
-              <li key={guide.id} className="text-data text-ink-2">
-                <a href={guide.url} className="font-medium text-blue-ink underline" target="_blank" rel="noopener noreferrer">
-                  {guide.publisher} · {guide.name}
-                </a>
-                <span className="block text-meta text-ink-3">{text.ai.published(monthOf(guide.published))}</span>
-                <span className="block">{text.ai.follows[guide.id]}</span>
-              </li>
-            ))}
-          </ul>
+          <Points points={text.ai.parts} wide />
         </section>
         <section aria-labelledby="architecture">
           <h2 id="architecture" className="text-[22px] font-bold leading-7 text-ink">
@@ -84,7 +64,8 @@ export function AboutPage() {
           </h2>
           <p className="mt-2 max-w-3xl text-module text-ink-2">{text.architecture.intro}</p>
           <Points points={text.architecture.points} />
-          <p className="mt-4 max-w-3xl text-data text-ink-2">{text.architecture.technologies}</p>
+          <h3 className="mt-8 text-module font-semibold text-ink">{cover.technologies}</h3>
+          <Technologies groups={text.architecture.technologies} />
         </section>
         <section aria-labelledby="code" className="module">
           <h2 id="code" className="module-title">
@@ -107,9 +88,10 @@ export function AboutPage() {
   );
 }
 
-function Points({ points }: { points: Point[] }) {
+/** Four short cards fit one row on a wide screen; six read better in rows of three. */
+function Points({ points, wide = false }: { points: Point[]; wide?: boolean }) {
   return (
-    <ul className="mt-4 grid gap-4 sm:grid-cols-2">
+    <ul className={`mt-4 grid gap-4 sm:grid-cols-2 ${wide ? 'xl:grid-cols-4' : 'lg:grid-cols-3'}`}>
       {points.map(point => (
         <li key={point.title} className="module">
           <h3 className="module-title">{point.title}</h3>
@@ -117,6 +99,23 @@ function Points({ points }: { points: Point[] }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+function Technologies({ groups }: { groups: TechnologyGroup[] }) {
+  return (
+    <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {groups.map(group => (
+        <section key={group.group} className="module" aria-label={group.group}>
+          <h4 className="module-title">{group.group}</h4>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-data text-ink-2">
+            {group.items.map(item => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </div>
   );
 }
 

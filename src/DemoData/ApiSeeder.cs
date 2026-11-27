@@ -22,9 +22,6 @@ public sealed class ApiSeeder(HttpClient http)
 
     private const string WriteHeader = "X-DispatchGuard-Request";
 
-    /// <summary>The one of the version before the rename, which is the one that answers after going back (SPEC 0094 R3).</summary>
-    private const string PreviousWriteHeader = "X-LOF-Request";
-
     private sealed record BaseRow(int Id, string Name);
 
     public async Task<SeedReport> SeedAsync(DateTime nowUtc, CancellationToken ct = default)
@@ -166,10 +163,7 @@ public sealed class ApiSeeder(HttpClient http)
     {
         using var response = await http.GetAsync("/api/session", ct);
         response.EnsureSuccessStatusCode();
-        foreach (var header in new[] { WriteHeader, PreviousWriteHeader })
-        {
-            if (!http.DefaultRequestHeaders.Contains(header)) http.DefaultRequestHeaders.Add(header, "1");
-        }
+        if (!http.DefaultRequestHeaders.Contains(WriteHeader)) http.DefaultRequestHeaders.Add(WriteHeader, "1");
     }
 
     private Task<HttpResponseMessage> AllocateAsync(int tripId, int driverId, int vehicleId, CancellationToken ct) =>

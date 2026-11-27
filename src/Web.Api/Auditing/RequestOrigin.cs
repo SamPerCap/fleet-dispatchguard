@@ -49,9 +49,6 @@ public sealed class RequestOrigin(IHttpContextAccessor accessor, DemoResetKey re
     /// <summary>Percent-encoded: a header only admits ASCII.</summary>
     public const string NameHeader = "X-DispatchGuard-Name";
 
-    /// <summary>A page opened before the rename still sends it (SPEC 0094 R3).</summary>
-    public const string PreviousNameHeader = "X-LOF-Name";
-
     private HttpContext? Context => accessor.HttpContext;
 
     public string? SessionId => AnonymousSession.IdOf(Context?.User);
@@ -69,7 +66,7 @@ public sealed class RequestOrigin(IHttpContextAccessor accessor, DemoResetKey re
     }
 
     private static string EncodedName(IHeaderDictionary headers) =>
-        (headers.TryGetValue(NameHeader, out var name) ? name : headers[PreviousNameHeader]).ToString();
+        headers[NameHeader].ToString();
 
     public bool IsDemoLoad => Context is { } context && (resetKey.IsIn(context.Request) || cronSecret.IsIn(context.Request));
 }

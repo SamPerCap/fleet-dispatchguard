@@ -12,11 +12,14 @@ import type { EngineeringSection } from './text';
 export function EngineeringPage() {
   const { tagline, engineering: text } = showcaseText();
   // It is another page for the reader, not a place further down the one that brought here.
-  useEffect(() => scrollTo({ top: 0 }), []);
+  // In a block: browsers now return a Promise from scrollTo, and React would call it as the cleanup (TypeError on Back).
+  useEffect(() => {
+    scrollTo({ top: 0 });
+  }, []);
   return (
     <div className="min-h-screen">
       <header className="on-navy bg-gradient-to-br from-navy to-navy-2 px-6 py-10 text-white sm:px-12">
-        <div className="mx-auto max-w-4xl">
+        <div className="mx-auto max-w-screen-2xl">
           <div className="flex items-center justify-between gap-3">
             <a href="#" className="inline-flex h-11 items-center gap-2 text-data font-medium text-side-fg hover:text-white">
               <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -39,7 +42,7 @@ export function EngineeringPage() {
           </a>
         </div>
       </header>
-      <main className="mx-auto max-w-4xl space-y-10 px-6 py-10 sm:px-12">
+      <main className="mx-auto max-w-screen-2xl space-y-10 px-6 py-10 sm:px-12">
         <Evidence />
         {text.sections.map(section => (
           <Section key={section.id} section={section} />
@@ -56,7 +59,7 @@ function Section({ section }: { section: EngineeringSection }) {
         {section.title}
       </h2>
       <p className="mt-2 max-w-3xl text-module text-ink-2">{section.intro}</p>
-      <ul className="mt-4 grid gap-4 sm:grid-cols-2">
+      <ul className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {section.points.map(point => (
           <li key={point.title} className="module">
             <h3 className="module-title">{point.title}</h3>

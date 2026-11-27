@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace Infrastructure.Tests.Persistence;
 
-/// <summary>A release and the version before it share the settings of the host (SPEC 0094 R3).</summary>
+/// <summary>The name before the rename is no longer read: its compatibility lasted one release (SPEC 0094 R3, removed in 0099).</summary>
 public class MainConnectionStringTests
 {
     private const string Current = "ConnectionStrings:DispatchGuardDb";
@@ -17,15 +17,12 @@ public class MainConnectionStringTests
     public void Read_OnlyTheNewName_ReturnsIt() => Assert.Equal("new", Read((Current, "new")));
 
     [Fact]
-    public void Read_OnlyThePreviousName_ReturnsIt() => Assert.Equal("old", Read((Previous, "old")));
-
-    [Fact]
-    public void Read_BothNames_TheNewOneWins() => Assert.Equal("new", Read((Previous, "old"), (Current, "new")));
+    public void Read_OnlyThePreviousName_IsNull() => Assert.Null(Read((Previous, "old")));
 
     [Theory]
     [InlineData("")]
     [InlineData("  ")]
-    public void Read_TheNewNameIsBlank_ReturnsThePreviousOne(string blank) => Assert.Equal("old", Read((Current, blank), (Previous, "old")));
+    public void Read_TheNewNameIsBlank_IsNull(string blank) => Assert.Null(Read((Current, blank), (Previous, "old")));
 
     [Fact]
     public void Read_Neither_IsNull() => Assert.Null(Read());

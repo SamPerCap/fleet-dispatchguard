@@ -63,7 +63,9 @@ export function StripModule({
     [list, from.getTime(), to.getTime(), now.getTime(), mode, driverName, plate], // eslint-disable-line react-hooks/exhaustive-deps
   );
   const [hover, setHover] = useState<{ row: string; block: StripBlock; rect: DOMRect } | null>(null);
-  useEffect(() => setHover(null), [rows]); // With another mode, other hours or new data, the highlighted block is no longer the same one.
+  useEffect(() => {
+    setHover(null);
+  }, [rows]); // With another mode, other hours or new data, the highlighted block is no longer the same one.
   // After scrolling, the fixed tooltip would no longer be next to its block.
   useEffect(() => {
     if (!hover) return;

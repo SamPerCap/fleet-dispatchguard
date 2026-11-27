@@ -3,7 +3,7 @@ import { renderToString } from 'react-dom/server';
 import { afterEach, describe, expect, it } from 'vitest';
 import { setLanguage } from '../language';
 import { AboutPage } from './AboutPage';
-import { AUTHOR, GUIDES } from './author';
+import { AUTHOR } from './author';
 import { REPOSITORY_URL } from './repository';
 import { showcaseText } from './showcaseText';
 
@@ -34,35 +34,30 @@ describe('About: only what the author wrote or approved (SPEC 0096 R4)', () => {
   });
 });
 
-describe('the guides are followed, never claimed (SPEC 0096 R6)', () => {
+describe('the About says how AI was used, without guides or commit counts (SPEC 0100 R1–R2)', () => {
   afterEach(() => setLanguage('es'));
 
-  it('each one links to its official source', () => {
-    const official = ['csrc.nist.gov', 'www.nist.gov', 'best.openssf.org'];
-    for (const guide of GUIDES) expect(official).toContain(new URL(guide.url).host);
+  it.each(['en', 'es'] as const)('in %s: no hypothetical case, no guides, no co-authorship count', async chosen => {
+    const page = await paintIn(chosen);
+
+    expect(page).not.toMatch(/hypothetical|hipotético|NIST|OpenSSF|Co-Authored-By/);
+    expect(page).toContain('Clean Architecture');
   });
 
-  it.each(['en', 'es'] as const)('in %s no compliance or certification is claimed', async chosen => {
-    const page = (await paintIn(chosen)).toLowerCase();
+  it.each(['en', 'es'] as const)('in %s every technology is a list item', async chosen => {
+    const page = await paintIn(chosen);
 
-    expect(page).not.toMatch(/compliant with|in compliance with|conforme a|de conformidad|certified by|certificado por/);
-    for (const guide of GUIDES) expect(page).toContain(showcaseText().about.ai.follows[guide.id].toLowerCase().replace(/&/g, '&amp;'));
-  });
-
-  it('the co-authorship says how it was counted', async () => {
-    const page = await paintIn('en');
-
-    expect(page).toContain('Co-Authored-By');
-    expect(page).toContain('git log');
+    for (const group of showcaseText().about.architecture.technologies)
+      for (const item of group.items) expect(page).toContain(`<li>${item.replace(/&/g, '&amp;')}</li>`);
   });
 });
 
-describe('the code before there is a public repository (SPEC 0096 R5)', () => {
-  it.each(['en', 'es'] as const)('in %s it is announced, with no link', async chosen => {
-    expect(REPOSITORY_URL).toBe('');
+describe('the code once the public repository exists (SPEC 0099)', () => {
+  it.each(['en', 'es'] as const)('in %s it links the repository and no longer announces it', async chosen => {
     const page = await paintIn(chosen);
 
-    expect(page).toContain(showcaseText().about.code.pending);
-    expect(linksOf(page).every(link => link !== '' && !link.includes('/blob/'))).toBe(true);
+    expect(REPOSITORY_URL).toMatch(/^https:\/\/github\.com\//);
+    expect(linksOf(page)).toContain(REPOSITORY_URL);
+    expect(page).not.toContain(showcaseText().about.code.pending);
   });
 });

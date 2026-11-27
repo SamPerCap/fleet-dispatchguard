@@ -69,23 +69,7 @@ export const es: ShowcaseText = {
     title: 'Sobre mí',
     contact: 'Contacto',
     story: [
-      'Fleet DispatchGuard se ha desarrollado con IA generativa (Claude Code) como solución a un problema real, planteado como caso hipotético: asignar conductor y autobús sin incumplir el Reglamento (CE) n.º 561/2006. La IA escribe la mayor parte del código; el método y las decisiones son míos.',
-      'Cada cambio nace de una especificación escrita y de un plan que apruebo antes de que exista código; las reglas legales se prueban primero, con sus casos límite; nada se cierra sin compilar sin avisos y con los tests en verde contra un PostgreSQL real. Arquitectura limpia (Clean Architecture) con diseño guiado por el dominio (DDD) y principios SOLID.',
-    ],
-    examplesIntro: 'Las prácticas siguen guías reconocidas para desarrollar con IA (NIST, OpenSSF), tales como:',
-    examples: [
-      {
-        title: 'El asistente trabaja con reglas escritas',
-        why: 'La arquitectura, la normativa, el idioma y lo que nunca debe hacer están en un fichero de reglas del repositorio, como recomienda la guía de OpenSSF sobre instrucciones para asistentes de código con IA.',
-      },
-      {
-        title: 'El código que se ejecuta se prueba, no se da por bueno',
-        why: 'Las reglas legales se prueban con sus casos límite antes de escribirlas, y el motor se compara con un oráculo independiente del artículo 6 (tiempos de conducción): la práctica PW.8 del SSDF de NIST, que la SP 800-218A mantiene para la IA generativa.',
-      },
-      {
-        title: 'La IA no decide la ley',
-        why: 'Cualquier cambio en una regla normativa lo confirma una persona, y lo que no se ha podido verificar se escribe al cerrar el cambio: frente al sesgo de automatización y la dependencia excesiva que NIST AI 600-1 señala como riesgo.',
-      },
+      'Construí Fleet DispatchGuard con IA generativa (Claude Code) para practicar con las herramientas que está adoptando el sector. La IA escribe código; la ingeniería es mía. Escribo la especificación y apruebo el plan antes de que exista código, las reglas legales se prueban primero con sus casos límite, y nada se cierra sin compilar limpio y con los tests en verde contra un PostgreSQL real. El diseño sigue Clean Architecture, diseño guiado por el dominio (DDD) y SOLID. El problema que resuelve: asignar conductor y autobús sin incumplir el Reglamento (CE) n.º 561/2006.',
     ],
     architecture: {
       title: 'Arquitectura, patrones y tecnología',
@@ -116,8 +100,12 @@ export const es: ShowcaseText = {
           why: 'Todo texto que lee una persona, en la API y en la web, sale de un catálogo en inglés y español; el código decide con códigos, nunca con textos.',
         },
       ],
-      technologies:
-        '.NET 10 con Minimal APIs, Entity Framework Core y PostgreSQL 17; xUnit con Testcontainers y BenchmarkDotNet; React 18, TypeScript, Vite y Tailwind CSS con Vitest, ESLint y Playwright; una sola imagen Docker para API y web, publicada en Vercel con Neon.',
+      technologies: [
+        { group: 'Backend', items: ['.NET 10 · Minimal APIs', 'Entity Framework Core', 'PostgreSQL 17'] },
+        { group: 'Tests', items: ['xUnit', 'Testcontainers', 'BenchmarkDotNet', 'Vitest', 'Playwright'] },
+        { group: 'Web', items: ['React 18 · TypeScript', 'Vite', 'Tailwind CSS', 'ESLint'] },
+        { group: 'Despliegue', items: ['Una sola imagen Docker para API y web', 'Vercel', 'Neon'] },
+      ],
     },
     ai: {
       title: 'Cómo se usa la IA',
@@ -140,16 +128,6 @@ export const es: ShowcaseText = {
           why: 'Los tests demuestran que funcionan los casos que comprueban, no que no haya errores. La lectura del Reglamento es mía y no es asesoramiento legal. Las cifras se midieron en una máquina en la fecha que indican, y lo que no se pudo verificar está escrito en las notas de cierre de cada especificación.',
         },
       ],
-      coauthorship: (coauthored, total, commit, countedOn) =>
-        `Coautoría, sin maquillar: ${coauthored} de los ${total} commits del historial privado llevan a Claude como coautor (la línea Co-Authored-By, contada con git log hasta el commit ${commit} el ${countedOn}). El repositorio público nacerá con un historial limpio, donde esta cuenta no se puede repetir.`,
-      guidesTitle: 'Guías que se siguen',
-      guidesIntro: 'Seguidas, no certificadas: nadie ha evaluado este proyecto frente a ellas. Cada una, en su fuente oficial:',
-      follows: {
-        'nist-sp-800-218a': 'Prácticas PW.7 (revisar y analizar el código) y PW.8 (probar el código ejecutable).',
-        'nist-ai-600-1': 'El riesgo que llama Human-AI Configuration: sesgo de automatización y dependencia excesiva.',
-        'openssf-ai-assistants': 'Instrucciones escritas para el asistente, el desarrollador al mando, tests y búsqueda de secretos.',
-      },
-      published: date => `Publicada en ${date}`,
     },
     code: {
       title: 'El código',
@@ -302,6 +280,8 @@ export const es: ShowcaseText = {
       },
     ],
   },
+  loading: 'Cargando la aplicación…',
+  pageFailed: 'No se ha podido mostrar esta página.',
   appFailed: 'No se ha podido cargar la aplicación.',
   tryAgain: 'Volver a intentar',
 };

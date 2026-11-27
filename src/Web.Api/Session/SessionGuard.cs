@@ -16,9 +16,6 @@ public sealed class SessionGuard(RequestDelegate next, SessionSettings settings,
 {
     public const string Header = "X-DispatchGuard-Request";
 
-    /// <summary>A page opened before the rename still sends it (SPEC 0094 R3).</summary>
-    public const string PreviousHeader = "X-LOF-Request";
-
     /// <summary>The web reads it to tell this 401 from a wrong key.</summary>
     private const string SessionMissing = "sessionMissing";
 
@@ -50,7 +47,7 @@ public sealed class SessionGuard(RequestDelegate next, SessionSettings settings,
     }
 
     private static bool CarriesTheHeader(HttpRequest request) =>
-        request.Headers.ContainsKey(Header) || request.Headers.ContainsKey(PreviousHeader);
+        request.Headers.ContainsKey(Header);
 
     /// <summary>Every endpoint unless it says otherwise: a new one is closed without anyone having to remember it.</summary>
     private static bool IsGuarded(HttpContext context) =>

@@ -65,23 +65,7 @@ export const en: ShowcaseText = {
     title: 'About',
     contact: 'Contact',
     story: [
-      'Fleet DispatchGuard was developed with generative AI (Claude Code) as the solution to a real problem, set out as a hypothetical case: assigning driver and bus without breaking Regulation (EC) No 561/2006. The AI writes most of the code; the method and the decisions are mine.',
-      'Every change starts from a written specification and a plan that I approve before any code exists; the legal rules are tested first, with their edge cases; nothing is closed unless it builds without warnings and with the tests green against a real PostgreSQL. Clean Architecture with domain-driven design (DDD) and SOLID principles.',
-    ],
-    examplesIntro: 'The practices follow recognised guides for developing with AI (NIST, OpenSSF), such as:',
-    examples: [
-      {
-        title: 'The assistant works under written rules',
-        why: 'Architecture, regulation, language and what it must never do are in a rules file of the repository, as the OpenSSF guide for AI code assistant instructions recommends.',
-      },
-      {
-        title: 'Code that runs is tested, not trusted',
-        why: 'Legal rules are tested with their edge cases before they are written, and the engine is compared with an independent oracle for Article 6 (driving times): practice PW.8 of the NIST SSDF, which SP 800-218A keeps for generative AI.',
-      },
-      {
-        title: 'The AI does not decide the law',
-        why: 'Any change to a regulatory rule is confirmed by a person, and what could not be verified is written when the change is closed: against the automation bias and over-reliance that NIST AI 600-1 names as a risk.',
-      },
+      'I built Fleet DispatchGuard with generative AI (Claude Code) to practise working with the tools the industry is adopting. The AI writes code; I own the engineering. I write the specification and approve the plan before any code exists, the legal rules are tested first with their edge cases, and nothing is closed without a clean build and green tests against a real PostgreSQL. The design follows Clean Architecture, domain-driven design (DDD) and SOLID. The problem it solves: assigning a driver and a bus without breaking Regulation (EC) No 561/2006.',
     ],
     architecture: {
       title: 'Architecture, patterns and technology',
@@ -112,8 +96,12 @@ export const en: ShowcaseText = {
           why: 'Every text a person reads, in the API and the web, comes from a catalogue in English and Spanish; the code decides with codes, never with texts.',
         },
       ],
-      technologies:
-        '.NET 10 with Minimal APIs, Entity Framework Core and PostgreSQL 17; xUnit with Testcontainers and BenchmarkDotNet; React 18, TypeScript, Vite and Tailwind CSS with Vitest, ESLint and Playwright; one Docker image for API and web, published on Vercel with Neon.',
+      technologies: [
+        { group: 'Backend', items: ['.NET 10 · Minimal APIs', 'Entity Framework Core', 'PostgreSQL 17'] },
+        { group: 'Tests', items: ['xUnit', 'Testcontainers', 'BenchmarkDotNet', 'Vitest', 'Playwright'] },
+        { group: 'Web', items: ['React 18 · TypeScript', 'Vite', 'Tailwind CSS', 'ESLint'] },
+        { group: 'Delivery', items: ['One Docker image for API and web', 'Vercel', 'Neon'] },
+      ],
     },
     ai: {
       title: 'How AI is used',
@@ -136,16 +124,6 @@ export const en: ShowcaseText = {
           why: 'Tests show that the cases they check work, not that there are no errors. The reading of the Regulation is mine and is not legal advice. The figures were measured on one machine on the date they show, and what could not be verified is written in the closing notes of each specification.',
         },
       ],
-      coauthorship: (coauthored, total, commit, countedOn) =>
-        `Co-authorship, unretouched: ${coauthored} of the ${total} commits of the private history carry Claude as co-author (the Co-Authored-By line, counted with git log up to commit ${commit} on ${countedOn}). The public repository will start with a clean history, where this count cannot be redone.`,
-      guidesTitle: 'Guides followed',
-      guidesIntro: 'Followed, not certified: nobody has assessed this project against them. Each one, at its official source:',
-      follows: {
-        'nist-sp-800-218a': 'Practices PW.7 (review and analyse the code) and PW.8 (test the executable code).',
-        'nist-ai-600-1': 'The risk it calls Human-AI Configuration: automation bias and over-reliance.',
-        'openssf-ai-assistants': 'Written instructions for the assistant, the developer in control, tests and checks for secrets.',
-      },
-      published: date => `Published ${date}`,
     },
     code: {
       title: 'The code',
@@ -298,6 +276,8 @@ export const en: ShowcaseText = {
       },
     ],
   },
+  loading: 'Loading the application…',
+  pageFailed: 'This page could not be shown.',
   appFailed: 'The application could not be loaded.',
   tryAgain: 'Try again',
 };

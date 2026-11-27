@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PAGE_IDS } from './pageIds';
-import { placeOf } from './route';
+import { currentAnchorOf, placeOf } from './route';
 
 describe('what an address shows', () => {
   it.each(['', '#', '#es', '#en', '#something-else'])('«%s» is the cover', hash => {
@@ -20,8 +20,14 @@ describe('what an address shows', () => {
   });
 
   it('the engineering page and the cover in a language can be reached with a card in the address', () => {
-    expect(placeOf('#como-esta-hecho', '?conductor=3')).toBe('engineering');
+    expect(placeOf('#how-it-is-built', '?conductor=3')).toBe('engineering');
     expect(placeOf('#about', '?conductor=3')).toBe('about');
     expect(placeOf('#en', '?conductor=3')).toBe('cover');
+  });
+
+  it('the old Spanish anchor still opens the engineering page and is rewritten to the English one', () => {
+    expect(placeOf('#como-esta-hecho', '')).toBe('engineering');
+    expect(currentAnchorOf('#como-esta-hecho')).toBe('#how-it-is-built');
+    expect(currentAnchorOf('#how-it-is-built')).toBeNull();
   });
 });

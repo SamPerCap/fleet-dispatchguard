@@ -1,19 +1,9 @@
 // If the browser does not allow storage, the preference lasts only for this visit.
 import type { Scope } from './api';
 
-/** What was kept under the names before the rename (SPEC 0094 R3); the new key wins, even if it is empty. */
-const PREVIOUS_KEYS: Record<string, string> = {
-  'dispatchguard.assignedBy': 'lof.assignedBy',
-  'dispatchguard.baseId': 'lof.baseId',
-  'dispatchguard.stripHours': 'lof.stripHours',
-  'dispatchguard.stripMode': 'lof.stripMode',
-  'dispatchguard.welcomeDismissed': 'betterbus.welcomeDismissed',
-};
-
 export const read = (key: string) => {
   try {
-    const previousKey = PREVIOUS_KEYS[key];
-    return localStorage.getItem(key) ?? (previousKey ? localStorage.getItem(previousKey) : null);
+    return localStorage.getItem(key);
   } catch {
     return null;
   }

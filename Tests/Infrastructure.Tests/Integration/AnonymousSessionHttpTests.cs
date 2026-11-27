@@ -70,11 +70,11 @@ public sealed class AnonymousSessionHttpTests(PostgreSqlFixture db)
         Assert.True((await ProblemAsync(response)).GetProperty("sessionMissing").GetBoolean());
     }
 
-    /// <summary>The second one comes from a page opened before the rename (SPEC 0094 R3).</summary>
+    /// <summary>The name before the rename lasted one release (SPEC 0094 R3, removed in 0099).</summary>
     [Theory]
-    [InlineData(GuardHeader)]
-    [InlineData(PreviousGuardHeader)]
-    public async Task Write_WithAnyNameOfTheHeader_IsAccepted(string header)
+    [InlineData(GuardHeader, HttpStatusCode.Created)]
+    [InlineData(PreviousGuardHeader, HttpStatusCode.Forbidden)]
+    public async Task Write_WithEachNameOfTheHeader_OnlyTheCurrentOneIsAccepted(string header, HttpStatusCode expected)
     {
         await using var factory = Factory();
         using var client = WithoutCookieJar(factory);
@@ -84,21 +84,7 @@ public sealed class AnonymousSessionHttpTests(PostgreSqlFixture db)
 
         using var response = await client.SendAsync(request);
 
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
-    }
-
-    /// <summary>The variable of the host before the rename (SPEC 0094 R3).</summary>
-    [Fact]
-    public async Task ConnectionString_OnlyWithItsPreviousName_IsUsed()
-    {
-        await using var factory = new SpanishApiFactory().WithWebHostBuilder(builder =>
-        {
-            builder.UseEnvironment("Testing");
-            builder.UseSetting("ConnectionStrings:BetterBusDb", db.ConnectionString);
-        });
-        using var client = factory.CreateClient();
-
-        Assert.Equal(HttpStatusCode.OK, (await client.GetAsync("/api/bases")).StatusCode);
+        Assert.Equal(expected, response.StatusCode);
     }
 
     [Fact]

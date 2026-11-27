@@ -103,12 +103,11 @@ public sealed class VisitsHttpTests(PostgreSqlFixture server) : IAsyncLifetime
 
     private DispatchGuardDbContext Context() => _database.CreateContext();
 
-    /// <summary>CA2. The second name comes from a page opened before the rename (SPEC 0094 R3).</summary>
-    [Theory]
-    [InlineData("X-DispatchGuard-Name")]
-    [InlineData("X-LOF-Name")]
-    public async Task Action_ItsRequestAndItsChange_ShareTheThread(string nameHeader)
+    /// <summary>CA2.</summary>
+    [Fact]
+    public async Task Action_ItsRequestAndItsChange_ShareTheThread()
     {
+        const string nameHeader = "X-DispatchGuard-Name";
         await using var factory = Factory();
         using var client = await BrowserAsync(factory);
         await SendBatchAsync(client, null, new { AgoMs = 5, Kind = "Click", Name = "Guardar", TraceId = Trace });

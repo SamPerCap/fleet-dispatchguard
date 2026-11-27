@@ -11,8 +11,7 @@ public sealed record CheckResult(string Name, bool Passed, string Detail);
 /// </summary>
 public sealed class DeploymentCheck(HttpClient http)
 {
-    /// <summary>Both names: after going back, the version that answers only knows the old one (SPEC 0094 R3).</summary>
-    private static readonly string[] WriteHeaders = ["X-DispatchGuard-Request", "X-LOF-Request"];
+    private const string WriteHeader = "X-DispatchGuard-Request";
 
     private static readonly string Unknown = int.MaxValue.ToString(CultureInfo.InvariantCulture);
 
@@ -50,7 +49,7 @@ public sealed class DeploymentCheck(HttpClient http)
         try
         {
             using var request = new HttpRequestMessage(method, url);
-            foreach (var header in WriteHeaders) request.Headers.Add(header, "1");
+            request.Headers.Add(WriteHeader, "1");
             using var response = await http.SendAsync(request, cancellationToken);
             var type = response.Content.Headers.ContentType?.MediaType;
             return new CheckResult(
