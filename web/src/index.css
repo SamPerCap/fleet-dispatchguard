@@ -203,14 +203,25 @@
 .fade-in { animation: brand-fade 160ms var(--ease) backwards; }
 
 /* The wait for the database: the only motion that does not stop, because nothing else happens meanwhile. */
-.traffic { position: relative; align-self: stretch; margin-inline: -24px; height: 60px; overflow: hidden; border-bottom: 3px dashed rgb(var(--line)); }
-.traffic-vehicle { position: absolute; bottom: 4px; left: 0; animation: brand-drive linear infinite; }
-.traffic-bounce, .traffic-bounce > svg { display: block; }
-.traffic-bounce { animation: brand-bounce 520ms ease-in-out infinite; }
-.traffic-wheel { animation: brand-roll 700ms linear infinite; }
-@keyframes brand-drive { from { transform: translateX(-100%); } to { transform: translateX(100vw); } }
 @keyframes brand-bounce { 50% { transform: translateY(-1.5px); } }
 @keyframes brand-roll { to { transform: rotate(360deg); } }
+
+/* SPEC 0101: vehicles come in from the left, queue at the light on the right and leave on green. */
+.traffic-road { position: relative; align-self: stretch; height: 92px; overflow: hidden; border-bottom: 3px dashed rgb(var(--line)); }
+.traffic-car { position: absolute; bottom: 4px; transform: translateX(-110vw); }
+.traffic-idle, .traffic-idle > svg { display: block; }
+.traffic-idle { animation: brand-bounce 520ms ease-in-out infinite; }
+.traffic-car .traffic-wheel { animation: brand-roll 450ms linear infinite; }
+.traffic-car.is-arriving { animation: brand-arrive 2600ms cubic-bezier(0.2, 0.6, 0.35, 1) forwards; }
+.traffic-car.is-stopped .traffic-wheel { animation: none; }
+.traffic-car.is-stopped .traffic-idle { animation-duration: 260ms; }
+.traffic-car.is-leaving { transform: none; animation: brand-leave 1200ms ease-in forwards; }
+.traffic-car.is-passing { animation: brand-pass 1600ms linear forwards; }
+.traffic-light-post { position: absolute; bottom: 0; }
+.traffic-lamp { filter: drop-shadow(0 0 6px currentColor); }
+@keyframes brand-arrive { from { transform: translateX(-110vw); } to { transform: none; } }
+@keyframes brand-leave { from { transform: none; } to { transform: translateX(110vw); } }
+@keyframes brand-pass { from { transform: translateX(-110vw); } to { transform: translateX(110vw); } }
 
 /* No other constant motion; none at all if the system asks to reduce it. */
 @media (prefers-reduced-motion: reduce) {
@@ -218,5 +229,5 @@
   /* With `backwards`, a delay would keep the block invisible during its step. */
   .page > *, .palette-pop, .fade-in { animation: none !important; }
   /* Without motion, the vehicles would pile up at one end. */
-  .traffic { display: none; }
+  .traffic-car { display: none; }
 }

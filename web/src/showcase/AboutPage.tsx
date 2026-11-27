@@ -19,7 +19,7 @@ export function AboutPage() {
   return (
     <div className="min-h-screen">
       <header className="on-navy bg-gradient-to-br from-navy to-navy-2 px-4 py-10 text-white sm:px-12">
-        <div className="mx-auto max-w-screen-2xl">
+        <div className="mx-auto max-w-[110rem]">
           <div className="flex items-center justify-between gap-3">
             <a href="#" className="inline-flex h-11 items-center gap-2 text-data font-medium text-side-fg hover:text-white">
               <ArrowLeft className="h-4 w-4" aria-hidden />
@@ -43,10 +43,10 @@ export function AboutPage() {
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-screen-2xl space-y-10 px-4 py-10 sm:px-12">
+      <main className="mx-auto max-w-[110rem] space-y-10 px-4 py-10 sm:px-12">
         <section className="space-y-4">
           {text.story.map(paragraph => (
-            <p key={paragraph} className="max-w-3xl text-module text-ink-2">
+            <p key={paragraph} className="text-module text-ink-2">
               {paragraph}
             </p>
           ))}
@@ -55,14 +55,14 @@ export function AboutPage() {
           <h2 id="ai" className="text-[22px] font-bold leading-7 text-ink">
             {text.ai.title}
           </h2>
-          <p className="mt-2 max-w-3xl text-module text-ink-2">{text.ai.intro}</p>
+          <p className="mt-2 text-module text-ink-2">{text.ai.intro}</p>
           <Points points={text.ai.parts} wide />
         </section>
         <section aria-labelledby="architecture">
           <h2 id="architecture" className="text-[22px] font-bold leading-7 text-ink">
             {text.architecture.title}
           </h2>
-          <p className="mt-2 max-w-3xl text-module text-ink-2">{text.architecture.intro}</p>
+          <p className="mt-2 text-module text-ink-2">{text.architecture.intro}</p>
           <Points points={text.architecture.points} />
           <h3 className="mt-8 text-module font-semibold text-ink">{cover.technologies}</h3>
           <Technologies groups={text.architecture.technologies} />

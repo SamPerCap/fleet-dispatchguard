@@ -41,8 +41,9 @@ export const EVIDENCE: EvidenceSource[] = [
 ];
 
 /** A date of the form 2026-11-26, written as its reader writes dates. */
+/** Month and year only: the day adds precision nobody needs to judge a measurement. */
 export function dateOf(isoDay: string): string {
-  return new Date(`${isoDay}T12:00:00Z`).toLocaleDateString(locale(), { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  return new Date(`${isoDay}T12:00:00Z`).toLocaleDateString(locale(), { month: 'short', year: 'numeric', timeZone: 'UTC' });
 }
 
 /**

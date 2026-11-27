@@ -5,7 +5,7 @@ export const en: ShowcaseText = {
   cover: {
     title: 'It never saves an illegal assignment. Try to make it.',
     problem:
-      "The hard part isn't finding someone who is free, but someone who can legally drive: breaks, rest periods and limits on driving time (EC 561/2006). Fleet DispatchGuard checks it before saving and, when a rule is broken, says which one and why.",
+      "The hard part isn't finding someone who is free, but someone who can legally drive: breaks, rest periods and limits on driving time (EC 561/2006).\nFleet DispatchGuard checks it before saving and, when a rule is broken, says which one and why.",
     tryIt: 'Try it',
     howItIsBuilt: "How it's built",
     about: 'About',
@@ -39,7 +39,7 @@ export const en: ShowcaseText = {
           'BenchmarkDotNet, Release build, .NET 10, on an AMD Ryzen 7 7800X3D. A new driver takes 1.3 µs. It is the check run for every candidate before proposing or assigning.',
       },
     },
-    measuredOn: date => `Measured on ${date}`,
+    measuredOn: date => `Measured in ${date}`,
     reproduce: 'Reproduce it',
     readTheCode: 'Read the code',
   },
@@ -136,7 +136,7 @@ export const en: ShowcaseText = {
     back: 'Cover',
     title: "How it's built",
     intro:
-      'The decisions behind it, how the work is done and what went wrong. The code will be published soon; until then, what is stated here can be seen in the demo or is explained with its reason.',
+      'The decisions behind it, how the work is done and what went wrong. What is stated here can be seen in the demo or checked in the public code.',
     sections: [
       {
         id: 'arquitectura',
@@ -276,7 +276,19 @@ export const en: ShowcaseText = {
       },
     ],
   },
-  loading: 'Loading the application…',
+  scene: {
+    messages: [
+      'Loading the database…',
+      'Setting up the bases…',
+      'Building the schedules…',
+      'Inventing excuses for absences…',
+    ],
+    allLoaded: 'All loaded!',
+    waking: (wait, measuredOn) =>
+      `The database switches off when nobody uses it and is now starting. The last time it took ${wait} (${measuredOn}); you will go in as soon as it is ready.`,
+    unavailable: 'The demo is not available now',
+    timedOut: 'Two minutes have gone by and the database has not answered. Try again in a while.',
+  },
   pageFailed: 'This page could not be shown.',
   appFailed: 'The application could not be loaded.',
   tryAgain: 'Try again',

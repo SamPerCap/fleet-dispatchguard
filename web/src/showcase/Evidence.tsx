@@ -10,7 +10,7 @@ export function Evidence() {
       <h2 id="evidence" className="text-[22px] font-bold leading-7 text-ink">
         {text.title}
       </h2>
-      <p className="mt-2 max-w-3xl text-module text-ink-2">{text.intro}</p>
+      <p className="mt-2 text-module text-ink-2">{text.intro}</p>
       <ul className="mt-4 grid gap-4 lg:grid-cols-3">
         {EVIDENCE.map(source => {
           const item = text.items[source.id];

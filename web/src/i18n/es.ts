@@ -1151,14 +1151,6 @@ export const es: Texts = {
     updateNow: 'Actualizar ahora',
     update: 'Actualizar',
   },
-  start: {
-    preparing: 'Preparando la demo…',
-    waking: (wait: string, measuredOn: string) =>
-      `La base de datos se apaga cuando nadie la usa y ahora está arrancando. La última vez tardó ${wait} (${measuredOn}); entrarás en cuanto esté lista.`,
-    unavailable: 'La demo no está disponible ahora',
-    timedOut: 'Han pasado 2 minutos y la base de datos no ha respondido. Vuelve a intentarlo dentro de un rato.',
-    tryAgain: 'Volver a intentar',
-  },
   status: {
     planned: 'Planificado',
     plannedWhat: 'Le falta conductor o vehículo y sale después de hoy: aún no es una incidencia.',

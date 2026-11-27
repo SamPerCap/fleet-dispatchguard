@@ -43,7 +43,13 @@ export interface ShowcaseText {
     intro: string;
     sections: EngineeringSection[];
   };
-  loading: string;
+  scene: {
+    messages: string[];
+    allLoaded: string;
+    waking: (wait: string, measuredOn: string) => string;
+    unavailable: string;
+    timedOut: string;
+  };
   pageFailed: string;
   appFailed: string;
   tryAgain: string;

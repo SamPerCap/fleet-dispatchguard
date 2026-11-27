@@ -1150,15 +1150,6 @@ export const en = {
     updateNow: 'Update now',
     update: 'Update',
   },
-  start: {
-    preparing: 'Preparing the demo…',
-    // The last measurement, with its date (SPEC 0096 R8).
-    waking: (wait: string, measuredOn: string) =>
-      `The database switches off when nobody uses it and is now starting. The last time it took ${wait} (${measuredOn}); you will go in as soon as it is ready.`,
-    unavailable: 'The demo is not available now',
-    timedOut: '2 minutes have gone by and the database has not answered. Try again in a while.',
-    tryAgain: 'Try again',
-  },
   status: {
     planned: 'Planned',
     plannedWhat: 'It lacks driver or vehicle and leaves after today: it is not an incident yet.',

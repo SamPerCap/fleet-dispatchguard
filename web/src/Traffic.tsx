@@ -1,31 +1,66 @@
-/** The fleet going by while the visitor waits. Pure decoration: hidden from screen readers and when motion is reduced. */
-const CONVOY = [
-  { Vehicle: Coach, tone: 'text-blue' },
-  { Vehicle: Minibus, tone: 'text-warning' },
-  { Vehicle: CityBus, tone: 'text-critical' },
-  { Vehicle: DoubleDecker, tone: 'text-success' },
-  { Vehicle: Minibus, tone: 'text-blue-bright' },
+import { useState, type AnimationEvent } from 'react';
+
+const QUEUE = [
+  { Vehicle: Coach, tone: 'text-blue', width: 112 },
+  { Vehicle: Minibus, tone: 'text-warning', width: 68 },
+  { Vehicle: CityBus, tone: 'text-critical', width: 96 },
+  { Vehicle: DoubleDecker, tone: 'text-success', width: 92 },
+  { Vehicle: Minibus, tone: 'text-blue-bright', width: 68 },
 ];
+const QUEUE_GAP = 12;
+/** Where the stop line is, measured from the right end of the road; the light stands just after it. */
+const STOP_LINE = 'max(56px, 8%)';
+/** One after another from the left, so the queue grows while the wait lasts. */
+const ARRIVE_EVERY_MS = 1_300;
+/** The first in the queue leaves first, the rest follow as it opens up. */
+const LEAVE_STAGGER_MS = 120;
 
-/** All at the same speed, so that none runs over another. */
-const CROSSING_SECONDS = 15;
-
-export function Traffic() {
+/**
+ * Vehicles come in from the left and stop at a red light on the right, queueing up while the application loads; on green they
+ * drive off. One that had not reached the queue yet does not stop: it goes straight through (SPEC 0101). Decorative.
+ */
+export function TrafficRoad({ green }: { green: boolean }) {
+  const [stopped, setStopped] = useState<Set<number>>(() => new Set());
+  const onArrived = (place: number) => (event: AnimationEvent) => {
+    if (event.target !== event.currentTarget) return;
+    setStopped(current => new Set(current).add(place));
+  };
+  let fromStopLine = 0;
   return (
-    <div className="traffic" aria-hidden>
-      {CONVOY.map(({ Vehicle, tone }, place) => (
-        <span
-          key={place}
-          className={`traffic-vehicle ${tone}`}
-          // A negative delay starts it halfway: the road is never empty.
-          style={{ animationDuration: `${CROSSING_SECONDS}s`, animationDelay: `${(-CROSSING_SECONDS * (place + 0.5)) / CONVOY.length}s` }}
-        >
-          <span className="traffic-bounce" style={{ animationDelay: `${-0.17 * place}s` }}>
-            <Vehicle />
+    <div className="traffic-road" aria-hidden>
+      {QUEUE.map(({ Vehicle, tone, width }, place) => {
+        const right = fromStopLine;
+        fromStopLine += width + QUEUE_GAP;
+        const motion = !green ? 'is-arriving' : stopped.has(place) ? 'is-leaving' : 'is-passing';
+        const delay = green ? (stopped.has(place) ? place * LEAVE_STAGGER_MS : 0) : place * ARRIVE_EVERY_MS;
+        return (
+          <span
+            key={`${place}-${motion}`}
+            className={`traffic-car ${motion} ${stopped.has(place) && !green ? 'is-stopped' : ''} ${tone}`}
+            style={{ right: `calc(${STOP_LINE} + ${right}px)`, animationDelay: `${delay}ms` }}
+            onAnimationEnd={green ? undefined : onArrived(place)}
+          >
+            <span className="traffic-idle" style={{ animationDelay: `${-0.13 * place}s` }}>
+              <Vehicle />
+            </span>
           </span>
-        </span>
-      ))}
+        );
+      })}
+      <span className="traffic-light-post" style={{ right: `calc(${STOP_LINE} - 44px)` }}>
+        <TrafficLight green={green} />
+      </span>
     </div>
+  );
+}
+
+function TrafficLight({ green }: { green: boolean }) {
+  return (
+    <svg width="34" height="84" viewBox="0 0 34 84" className="block">
+      <rect x="1" y="1" width="32" height="82" rx="8" className="fill-ink" />
+      <circle cx="17" cy="16" r="9" className={green ? 'fill-ink-3 opacity-40' : 'fill-critical-bright traffic-lamp'} />
+      <circle cx="17" cy="42" r="9" className="fill-ink-3 opacity-40" />
+      <circle cx="17" cy="68" r="9" className={green ? 'fill-success-bright traffic-lamp' : 'fill-ink-3 opacity-40'} />
+    </svg>
   );
 }
 

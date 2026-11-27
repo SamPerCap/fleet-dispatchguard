@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { App } from './App';
 import type { SeenPage } from './showcase/seenPages';
-import { StartScreen } from './StartScreen';
 import { visit } from './visit';
 
 /** Everything that asks the server: loaded only when the visitor goes in (SPEC 0093 R1). */
@@ -11,8 +10,7 @@ export function DispatcherApp({ seen, language }: { seen: SeenPage[]; language: 
     for (const page of seen.splice(0)) visit.screen(page.name, page.at);
   }, [seen]);
   return (
-    <StartScreen>
-      <App offerTour={comesFromTheCover} language={language} />
-    </StartScreen>
+    // The database already answered: the loading scene of the showcase waits for it (SPEC 0101).
+    <App offerTour={comesFromTheCover} language={language} />
   );
 }

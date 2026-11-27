@@ -9,7 +9,7 @@ export const es: ShowcaseText = {
   cover: {
     title: 'Nunca guarda una asignación ilegal. Intenta que lo haga.',
     problem:
-      'Lo difícil no es encontrar a alguien libre, sino a alguien que pueda conducir legalmente: pausas, descansos y límites de horas (CE 561/2006). Fleet DispatchGuard lo comprueba antes de guardar y, si no se cumple, dice qué regla y por qué.',
+      'Lo difícil no es encontrar a alguien libre, sino a alguien que pueda conducir legalmente: pausas, descansos y límites de horas (CE 561/2006).\nFleet DispatchGuard lo comprueba antes de guardar y, si no se cumple, dice qué regla y por qué.',
     tryIt: 'Probar',
     howItIsBuilt: 'Cómo está hecho',
     about: 'Sobre mí',
@@ -43,7 +43,7 @@ export const es: ShowcaseText = {
           'BenchmarkDotNet, compilación Release, .NET 10, en un AMD Ryzen 7 7800X3D. Un conductor nuevo, 1,3 µs. Es la comprobación que se hace con cada candidato antes de proponer o asignar.',
       },
     },
-    measuredOn: date => `Medido el ${date}`,
+    measuredOn: date => `Medido en ${date}`,
     reproduce: 'Cómo reproducirlo',
     readTheCode: 'Ver el código',
   },
@@ -140,7 +140,7 @@ export const es: ShowcaseText = {
     back: 'Portada',
     title: 'Cómo está hecho',
     intro:
-      'Qué decisiones hay detrás, cómo se trabaja y qué salió mal. El código se publicará pronto; hasta entonces, lo que se afirma aquí se ve en la demo o se explica con su motivo.',
+      'Qué decisiones hay detrás, cómo se trabaja y qué salió mal. Lo que se afirma aquí se ve en la demo o se comprueba en el código público.',
     sections: [
       {
         id: 'arquitectura',
@@ -280,7 +280,19 @@ export const es: ShowcaseText = {
       },
     ],
   },
-  loading: 'Cargando la aplicación…',
+  scene: {
+    messages: [
+      'Cargando la base de datos…',
+      'Preparando las bases…',
+      'Montando los horarios…',
+      'Inventando excusas para las ausencias…',
+    ],
+    allLoaded: '¡Todo cargado!',
+    waking: (wait, measuredOn) =>
+      `La base de datos se apaga cuando nadie la usa y ahora está arrancando. La última vez tardó ${wait} (${measuredOn}); entrarás en cuanto esté lista.`,
+    unavailable: 'La demo no está disponible ahora',
+    timedOut: 'Han pasado dos minutos y la base de datos no ha respondido. Vuelve a intentarlo dentro de un rato.',
+  },
   pageFailed: 'No se ha podido mostrar esta página.',
   appFailed: 'No se ha podido cargar la aplicación.',
   tryAgain: 'Volver a intentar',

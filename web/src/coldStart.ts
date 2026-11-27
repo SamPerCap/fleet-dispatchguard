@@ -1,3 +1,5 @@
+import { QUIET_MS } from './quietTime';
+
 // The database of the demo sleeps when nobody uses it, and takes a while to wake up (SPEC 0091).
 
 type Fetch = (url: string, init?: RequestInit) => Promise<Response>;
@@ -6,8 +8,7 @@ export type ColdStartState = 'preparing' | 'late' | 'ready';
 
 export const ASK_EVERY_MS = 3_000;
 export const GIVE_UP_AFTER_MS = 120_000;
-/** With the database up the answer takes less, and the screen would only flash. */
-export const QUIET_MS = 600;
+export { QUIET_MS };
 /** The API gives up before: this is for a connection that never answers. */
 const ANSWER_WITHIN_MS = 10_000;
 

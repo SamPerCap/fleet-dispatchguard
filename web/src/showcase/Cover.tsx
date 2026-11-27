@@ -23,9 +23,9 @@ export function Cover() {
         </span>
         <LanguageSwitch />
       </header>
-      <main className="mx-auto w-full max-w-screen-2xl flex-1 px-4 py-8 sm:px-12">
-        <h1 className="max-w-4xl text-page font-bold text-ink sm:text-display">{text.title}</h1>
-        <p className="mt-5 max-w-2xl text-module text-ink-2">{text.problem}</p>
+      <main className="mx-auto w-full max-w-[110rem] flex-1 px-4 py-8 sm:px-12">
+        <h1 className="text-page font-bold text-ink sm:text-display">{text.title}</h1>
+        <p className="mt-5 whitespace-pre-line text-module text-ink-2">{text.problem}</p>
         <div className="mt-8 flex flex-wrap gap-3">
           <a href={START_HASH} className="btn btn-primary h-12 px-6 text-module font-semibold">
             {text.tryIt}
@@ -40,7 +40,7 @@ export function Cover() {
             {text.about}
           </a>
         </div>
-        <p className="mt-6 max-w-2xl text-meta text-ink-3">{text.notes(wait, measuredOn).join(' ')}</p>
+        <p className="mt-6 text-meta text-ink-3">{text.notes(wait, measuredOn).join(' ')}</p>
         <div className="mt-12">
           <Evidence />
         </div>

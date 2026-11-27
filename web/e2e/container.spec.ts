@@ -36,16 +36,17 @@ test('A script from inside the page does not run', async ({ page }) => {
   expect(await page.evaluate(() => 'injected' in window)).toBe(false);
 });
 
-test('With the database asleep it waits and goes in by itself', async ({ page }) => {
+test('With the database asleep it waits at a red light and goes in by itself (SPEC 0101)', async ({ page }) => {
   let asleep = true;
   await page.route('**/health/ready', route => (asleep ? route.fulfill({ status: 503 }) : route.continue()));
   await page.goto('/#control');
-  await expect(page.getByRole('heading', { name: 'Preparando la demo…' })).toBeVisible();
-  await expect(page.locator('.traffic-vehicle')).toHaveCount(5);
+  await expect(page.getByRole('status')).toContainText('La base de datos se apaga');
+  await expect(page.locator('.traffic-car')).toHaveCount(5);
   await expect(page.getByRole('navigation', { name: 'Principal' })).toHaveCount(0);
 
   asleep = false;
 
-  await expect(page.getByRole('navigation', { name: 'Principal' })).toBeVisible({ timeout: 15_000 });
-  await expect(page.getByRole('heading', { name: 'Preparando la demo…' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: '¡Todo cargado!' })).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByRole('navigation', { name: 'Principal' })).toBeVisible({ timeout: 5_000 });
+  await expect(page.locator('.traffic-car')).toHaveCount(0);
 });

@@ -40,12 +40,12 @@ describe('the wait of a cold start says the measurement and its date (SPEC 0096 
 
   it('in English', async () => {
     await setLanguage('en');
-    expect(coldStartWait()).toEqual({ wait: '6.5–6.7 s', measuredOn: '25 Nov 2026' });
+    expect(coldStartWait()).toEqual({ wait: '6.5–6.7 s', measuredOn: 'Nov 2026' });
   });
 
   it('in Spanish', async () => {
     await setLanguage('es');
     expect(coldStartWait().wait).toBe('6,5–6,7 s');
-    expect(coldStartWait().measuredOn).toMatch(/^25 nov\.? 2026$/);
+    expect(coldStartWait().measuredOn).toMatch(/^nov\.? 2026$/);
   });
 });

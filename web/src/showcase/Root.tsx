@@ -1,10 +1,14 @@
 import { Component, useEffect, useRef, useState, type ReactNode } from 'react';
 import { language } from '../language';
-import { BrandMark } from '../brand/BrandArt';
 import { currentAnchorOf, placeOf, type Place } from '../route';
 import { useLanguage } from '../useLanguage';
 import { AboutPage } from './AboutPage';
+import type { createColdStart } from '../coldStart';
+import { QUIET_MS } from '../quietTime';
+import { prefersReducedMotion } from '../motion';
 import { createAppLoader, reloadMarkOfTheTab } from './appLoader';
+import { LoadingScene } from './LoadingScene';
+import { closingMarkOfTheTab, createLoadingScene, type ScenePhase } from './loadingPhases';
 import { Cover } from './Cover';
 import { EngineeringPage } from './EngineeringPage';
 import type { SeenPage } from './seenPages';
@@ -101,35 +105,52 @@ function Notice({ message, action, onAction }: { message: string; action: string
 }
 
 type LoadedApplication = Awaited<ReturnType<typeof loadApplication>>;
+type ColdStart = ReturnType<typeof createColdStart>;
 
+/**
+ * One scene from "Try it" to the application (SPEC 0101): the code, the session and the database are awaited together behind the
+ * same red light. The cold start and the session are imported on demand, so the cover still asks nothing (SPEC 0093 R1).
+ */
 function Application({ seen, language: chosen }: { seen: SeenPage[]; language: string }) {
   const [loaded, setLoaded] = useState<{ View: LoadedApplication } | null>(null);
-  const [failed, setFailed] = useState(false);
+  const [phase, setPhase] = useState<ScenePhase>('quiet');
+  const [databaseWaking, setDatabaseWaking] = useState(false);
+  const coldStart = useRef<ColdStart | null>(null);
+
   useEffect(() => {
     let live = true;
-    loadApplication().then(
-      View => live && setLoaded({ View }),
-      (failure: unknown) => {
-        // Kept visible: the notice alone said nothing of the cause (SPEC 0100 R7).
-        console.error('The application could not be loaded', failure);
-        if (live) setFailed(true);
-      },
-    );
+    const scene = createLoadingScene({ onPhase: setPhase, closing: closingMarkOfTheTab, reducedMotion: prefersReducedMotion(), quietMs: QUIET_MS });
+    const fail = (failure: unknown) => {
+      // Kept visible: the notice alone said nothing of the cause (SPEC 0100 R7).
+      console.error('The application could not be loaded', failure);
+      if (live) scene.applicationFailed();
+    };
+    loadApplication().then(View => {
+      if (!live) return;
+      setLoaded({ View });
+      scene.application();
+    }, fail);
+    Promise.all([import('../coldStart'), import('../session')]).then(([{ createColdStart, isReady }, { session }]) => {
+      if (!live) return;
+      coldStart.current = createColdStart({
+        ask: () => isReady(session.fetch),
+        onState: state => {
+          setDatabaseWaking(state === 'preparing');
+          scene.database(state);
+        },
+      });
+    }, fail);
     return () => {
       live = false;
+      scene.stop();
+      coldStart.current?.stop();
     };
   }, []);
 
-  if (loaded) return <loaded.View seen={seen} language={chosen} />;
-  const text = showcaseText();
-  if (failed) return <Notice message={text.appFailed} action={text.tryAgain} onAction={() => location.reload()} />;
-  // Only while the code really downloads: no delay is added (SPEC 0100 R6).
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-3 p-6" lang={language()}>
-      <BrandMark size={48} />
-      <p role="status" className="text-data text-ink-2">
-        {text.loading}
-      </p>
-    </main>
-  );
+  if (phase === 'in' && loaded) return <loaded.View seen={seen} language={chosen} />;
+  if (phase === 'failed') {
+    const text = showcaseText();
+    return <Notice message={text.appFailed} action={text.tryAgain} onAction={() => location.reload()} />;
+  }
+  return <LoadingScene phase={phase} databaseWaking={databaseWaking} onRetry={() => coldStart.current?.retry()} />;
 }
