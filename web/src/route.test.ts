@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { PAGE_IDS } from './pageIds';
-import { currentAnchorOf, placeOf } from './route';
+import { BREAK_THE_LAW_HASH, currentAnchorOf, placeOf, tourStartOf } from './route';
 
 describe('what an address shows', () => {
   it.each(['', '#', '#es', '#en', '#something-else'])('«%s» is the cover', hash => {
@@ -29,5 +29,24 @@ describe('what an address shows', () => {
     expect(placeOf('#como-esta-hecho', '')).toBe('engineering');
     expect(currentAnchorOf('#como-esta-hecho')).toBe('#how-it-is-built');
     expect(currentAnchorOf('#how-it-is-built')).toBeNull();
+  });
+});
+
+describe('the 60-second path from the cover (SPEC 0104 R1–R3)', () => {
+  it('«Try to break the law» opens the application', () => {
+    expect(placeOf(BREAK_THE_LAW_HASH, '')).toBe('application');
+  });
+
+  it('it starts the tour already searching, even without coming from the cover', () => {
+    expect(tourStartOf(BREAK_THE_LAW_HASH, false)).toBe('searching');
+    expect(tourStartOf(BREAK_THE_LAW_HASH, true)).toBe('searching');
+  });
+
+  it('from the cover by any other way the tour is only offered', () => {
+    expect(tourStartOf('#control', true)).toBe('offer');
+  });
+
+  it('a direct link to a page brings no tour', () => {
+    expect(tourStartOf('#control', false)).toBeNull();
   });
 });

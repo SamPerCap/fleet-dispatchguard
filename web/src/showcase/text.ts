@@ -20,6 +20,7 @@ export interface ShowcaseText {
     /** The thesis: one sentence the visitor can check in the demo itself (SPEC 0096 R1). */
     title: string;
     problem: string;
+    breakTheLaw: string;
     tryIt: string;
     howItIsBuilt: string;
     about: string;
@@ -81,10 +82,13 @@ export interface AboutText {
   contact: string;
   story: string[];
   architecture: { title: string; intro: string; points: Point[]; technologies: TechnologyGroup[] };
-  ai: {
+  /** Only what the author approved (SPEC 0104 R5). */
+  role: {
     title: string;
     intro: string;
-    parts: Point[];
+    decisions: Point[];
+    assistant: Point;
+    limits: Point;
   };
   code: { title: string; pending: string; link: string };
 }

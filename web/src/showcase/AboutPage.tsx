@@ -51,12 +51,13 @@ export function AboutPage() {
             </p>
           ))}
         </section>
-        <section aria-labelledby="ai">
-          <h2 id="ai" className="text-[22px] font-bold leading-7 text-ink">
-            {text.ai.title}
+        <section aria-labelledby="role">
+          <h2 id="role" className="text-[22px] font-bold leading-7 text-ink">
+            {text.role.title}
           </h2>
-          <p className="mt-2 text-module text-ink-2">{text.ai.intro}</p>
-          <Points points={text.ai.parts} wide />
+          <p className="mt-2 text-module text-ink-2">{text.role.intro}</p>
+          <Points points={text.role.decisions} wide />
+          <Points points={[text.role.assistant, text.role.limits]} />
         </section>
         <section aria-labelledby="architecture">
           <h2 id="architecture" className="text-[22px] font-bold leading-7 text-ink">

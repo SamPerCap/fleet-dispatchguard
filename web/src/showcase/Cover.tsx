@@ -1,8 +1,8 @@
-import { ArrowRight, UserRound, Wrench } from 'lucide-react';
+import { ArrowRight, ShieldX, UserRound, Wrench } from 'lucide-react';
 import { BRAND } from '../brand';
 import { BrandScene, BrandMark } from '../brand/BrandArt';
 import { LanguageSwitch } from '../LanguageSwitch';
-import { ABOUT_HASH, ENGINEERING_HASH, START_HASH } from '../route';
+import { ABOUT_HASH, BREAK_THE_LAW_HASH, ENGINEERING_HASH, START_HASH } from '../route';
 import { AllocationFlow } from './AllocationFlow';
 import { Evidence } from './Evidence';
 import { coldStartWait } from './measurements';
@@ -27,7 +27,12 @@ export function Cover() {
         <h1 className="text-page font-bold text-ink sm:text-display">{text.title}</h1>
         <p className="mt-5 whitespace-pre-line text-module text-ink-2">{text.problem}</p>
         <div className="mt-8 flex flex-wrap gap-3">
-          <a href={START_HASH} className="btn btn-primary h-12 px-6 text-module font-semibold">
+          <a href={BREAK_THE_LAW_HASH} className="btn btn-primary h-12 px-6 text-module font-semibold">
+            <ShieldX className="h-5 w-5" aria-hidden />
+            {text.breakTheLaw}
+            <ArrowRight className="h-5 w-5" aria-hidden />
+          </a>
+          <a href={START_HASH} className="btn h-12 px-6 text-module font-semibold">
             {text.tryIt}
             <ArrowRight className="h-5 w-5" aria-hidden />
           </a>

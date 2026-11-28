@@ -25,7 +25,7 @@ import { ResourceModal } from './ResourceModal';
 import type { ResourceKind } from './resourceUrl';
 import { Avatar, ErrorBox } from './ui';
 import { BACKDROP, NAV_ID, navPlacement } from './menu';
-import { ABOUT_HASH, ENGINEERING_HASH } from './route';
+import { ABOUT_HASH, BREAK_THE_LAW_HASH, ENGINEERING_HASH, START_HASH, tourStartOf } from './route';
 import { Tour } from './Tour';
 import { useResourceUrl } from './useResourceUrl';
 import type { Driver, Location, Trip, Vehicle } from './types';
@@ -101,7 +101,7 @@ export function App({ offerTour, language }: { offerTour: boolean; language: str
     const hashPage = location.hash.slice(1);
     return isPage(hashPage) ? hashPage : 'control';
   });
-  const [tour, setTour] = useState<'offer' | 'searching' | null>(offerTour ? 'offer' : null);
+  const [tour, setTour] = useState(() => tourStartOf(location.hash, offerTour));
   const [rulesGroup, setRulesGroup] = useState<string | null>(null);
   const [operator, setOperator] = useState(assignedBy);
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -180,6 +180,10 @@ export function App({ offerTour, language }: { offerTour: boolean; language: str
     };
     addEventListener('hashchange', onHash);
     return () => removeEventListener('hashchange', onHash);
+  }, []);
+  // Without a step in the history: Back returns to the cover, and a reload does not search again.
+  useEffect(() => {
+    if (location.hash === BREAK_THE_LAW_HASH) history.replaceState(null, '', `${location.search}${START_HASH}`);
   }, []);
 
   const master: MasterData = useMemo(() => {

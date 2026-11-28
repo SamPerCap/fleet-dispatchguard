@@ -61,3 +61,17 @@ describe('the code once the public repository exists (SPEC 0099)', () => {
     expect(page).not.toContain(showcaseText().about.code.pending);
   });
 });
+
+describe("the author's role and the AI's (SPEC 0104 R5)", () => {
+  afterEach(() => setLanguage('es'));
+
+  it.each(['en', 'es'] as const)('in %s: four decisions of the author, what the AI did and the limits', async chosen => {
+    const page = await paintIn(chosen);
+    const { role } = showcaseText().about;
+
+    expect(role.decisions).toHaveLength(4);
+    for (const decision of role.decisions) expect(page).toContain(decision.title);
+    expect(page).toContain(role.assistant.title);
+    expect(page).toContain(role.limits.title);
+  });
+});

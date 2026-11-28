@@ -10,6 +10,7 @@ export const es: ShowcaseText = {
     title: 'Nunca guarda una asignación ilegal. Intenta que lo haga.',
     problem:
       'Lo difícil no es encontrar a alguien libre, sino a alguien que pueda conducir legalmente: pausas, descansos y límites de horas (CE 561/2006).\nFleet DispatchGuard lo comprueba antes de guardar y, si no se cumple, dice qué regla y por qué.',
+    breakTheLaw: 'Intenta saltarte la ley',
     tryIt: 'Probar',
     howItIsBuilt: 'Cómo está hecho',
     about: 'Sobre mí',
@@ -107,27 +108,35 @@ export const es: ShowcaseText = {
         { group: 'Despliegue', items: ['Una sola imagen Docker para API y web', 'Vercel', 'Neon'] },
       ],
     },
-    ai: {
-      title: 'Cómo se usa la IA',
-      intro: 'Sin rodeos: qué hace, quién responde del resultado, cómo se comprueba y dónde no llega.',
-      parts: [
+    role: {
+      title: 'Mi papel y el de la IA',
+      intro: 'Estas decisiones son mías: las elegí, las puedo defender y cada una la comprueba algo distinto de mi palabra.',
+      decisions: [
         {
-          title: 'Alcance',
-          why: 'Claude Code escribe la mayor parte del código, los tests y la documentación, a partir de la especificación y el plan de cada cambio. El producto, la arquitectura, la lectura del Reglamento y la aprobación de cada plan son míos.',
+          title: 'Rechazar antes de guardar',
+          why: 'Una asignación ilegal nunca se guarda para corregirla después. Solo se puede forzar un incumplimiento del CE 561/2006, por una persona que da su nombre y un motivo; el intento queda registrado. Un bus no apto, un solape o un conductor no disponible no se fuerzan nunca.',
         },
         {
-          title: 'Responsabilidad humana',
-          why: 'Una persona decide qué se hace y confirma cada regla normativa; el asistente no «corrige» una regla por su cuenta. Publicar es un comando que solo lanzo yo.',
+          title: 'Un oráculo independiente del artículo 6',
+          why: 'El motor se contrasta con una segunda lectura del artículo 6 escrita desde el texto, sin código en común: 0 discrepancias en 10.102 casos aleatorios.',
         },
         {
-          title: 'Verificación',
-          why: 'Nada se acepta porque el asistente lo diga: los avisos son errores, los tests corren contra un PostgreSQL real, un oráculo independiente comprueba el artículo 6 (tiempos de conducción), cada cifra medida de esta web dice cómo se midió y cada cambio pasa una revisión propia.',
+          title: 'Bloqueos por servicio, conductor y bus',
+          why: 'Dos despachadores pueden pulsar a la vez. Bloqueos consultivos tomados en orden fijo hacen que gane exactamente una asignación en conflicto por ráfaga: 60 de 480, con dos instancias de la API.',
         },
         {
-          title: 'Límites',
-          why: 'Los tests demuestran que funcionan los casos que comprueban, no que no haya errores. La lectura del Reglamento es mía y no es asesoramiento legal. Las cifras se midieron en una máquina en la fecha que indican, y lo que no se pudo verificar está escrito en las notas de cierre de cada especificación.',
+          title: 'Una demo que duerme',
+          why: 'La portada no pide sesión ni despierta la base de datos; esta solo despierta cuando alguien entra, y los datos se reconstruyen cada noche. El repositorio público se exporta por lista blanca, con comprobaciones antes de que salga nada.',
         },
       ],
+      assistant: {
+        title: 'Qué hizo la IA',
+        why: 'Claude Code escribió la mayor parte del código, los tests y la documentación a partir de mis especificaciones y de los planes que aprobé. Revisé cada cambio, confirmé cada regla normativa y lanzo la publicación yo.',
+      },
+      limits: {
+        title: 'Límites',
+        why: 'Los tests demuestran que funcionan los casos que comprueban, no que no haya errores. La lectura del Reglamento es mía y no es asesoramiento legal. Las cifras se midieron en una máquina en la fecha que indican, y lo que no se pudo verificar está escrito en las notas de cierre de cada especificación.',
+      },
     },
     code: {
       title: 'El código',

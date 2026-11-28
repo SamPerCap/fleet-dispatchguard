@@ -6,6 +6,7 @@ export const en: ShowcaseText = {
     title: 'It never saves an illegal assignment. Try to make it.',
     problem:
       "The hard part isn't finding someone who is free, but someone who can legally drive: breaks, rest periods and limits on driving time (EC 561/2006).\nFleet DispatchGuard checks it before saving and, when a rule is broken, says which one and why.",
+    breakTheLaw: 'Try to break the law',
     tryIt: 'Try it',
     howItIsBuilt: "How it's built",
     about: 'About',
@@ -103,27 +104,35 @@ export const en: ShowcaseText = {
         { group: 'Delivery', items: ['One Docker image for API and web', 'Vercel', 'Neon'] },
       ],
     },
-    ai: {
-      title: 'How AI is used',
-      intro: 'In plain terms: what it does, who answers for the result, how it is checked and where it falls short.',
-      parts: [
+    role: {
+      title: 'My role and the AI\'s',
+      intro: 'The decisions below are mine: I chose them, I can defend them, and each one is checked by something other than my word.',
+      decisions: [
         {
-          title: 'Scope',
-          why: 'Claude Code writes most of the code, the tests and the documentation, from the specification and the plan of each change. The product, the architecture, the reading of the Regulation and the approval of every plan are mine.',
+          title: 'Reject before saving',
+          why: 'An illegal assignment is never stored and then corrected. Only an EC 561/2006 breach can be forced, by a person who gives a name and a reason; the attempt is recorded. An unfit bus, an overlap or an unavailable driver can never be forced.',
         },
         {
-          title: 'Human responsibility',
-          why: 'A person decides what is built and confirms every regulatory rule; the assistant does not “correct” a rule on its own. Publishing is a command that only I run.',
+          title: 'An independent oracle for Article 6',
+          why: 'The engine is checked against a second reading of Article 6 written from the text, sharing no code with it: 0 disagreements in 10,102 random cases.',
         },
         {
-          title: 'Verification',
-          why: 'Nothing is accepted because the assistant says so: warnings are errors, tests run against a real PostgreSQL, an independent oracle checks Article 6 (driving times), every measured figure on this site says how it was measured, and each change gets a review of its own.',
+          title: 'Locks per service, driver and bus',
+          why: 'Two dispatchers can click at the same moment. Advisory locks taken in a fixed order make exactly one clashing assignment win per burst: 60 of 480, across two API instances.',
         },
         {
-          title: 'Limits',
-          why: 'Tests show that the cases they check work, not that there are no errors. The reading of the Regulation is mine and is not legal advice. The figures were measured on one machine on the date they show, and what could not be verified is written in the closing notes of each specification.',
+          title: 'A demo that sleeps',
+          why: 'The cover asks for no session and wakes no database; the database wakes only when someone goes in, and the data are rebuilt every night. The public repository is exported by allowlist, with checks before anything leaves.',
         },
       ],
+      assistant: {
+        title: 'What the AI did',
+        why: 'Claude Code wrote most of the code, tests and documentation from my specifications and the plans I approved. I reviewed every change, confirmed every regulatory rule and run the release myself.',
+      },
+      limits: {
+        title: 'Limits',
+        why: 'Tests show that the cases they check work, not that there are no errors. The reading of the Regulation is mine and is not legal advice. The figures were measured on one machine on the date they show, and what could not be verified is written in the closing notes of each specification.',
+      },
     },
     code: {
       title: 'The code',
