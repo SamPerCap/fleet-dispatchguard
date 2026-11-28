@@ -2,9 +2,8 @@ import { t } from '../i18n/t';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { MasterData } from '../App';
 import type { Page } from '../pageIds';
-import { api, control, type Scope } from '../api';
-import { clampStripHours, merge, STRIP_MAX_HOURS, stripWindow, type AlertTarget, type StripMode } from '../control';
-import { addDays, startOfDay } from '../gantt';
+import { api, control, forgetReads, type Scope } from '../api';
+import { clampStripHours, merge, type AlertTarget, type StripMode } from '../control';
 import { ActivityModule } from '../home/Activity';
 import { EfficiencyModule } from '../home/Efficiency';
 import { EngineModule } from '../home/Engine';
@@ -13,6 +12,7 @@ import { ResourcesModule } from '../home/Resources';
 import { HomeHero } from '../home/Situation';
 import { StripModule } from '../home/Strip';
 import { settle, type HomeData, type Loaded } from '../home/data';
+import { controlReads } from '../home/requests';
 import { read, readScope, write, writeScope } from '../storage';
 import type { BarExplanation } from '../Timeline';
 import type { OperatingBase, RuleGroup, Trip } from '../types';
@@ -86,20 +86,7 @@ export function ControlPage({
     const id = ++seq.current;
     setLoading(true);
     const at = new Date();
-    const today = startOfDay(at),
-      yesterday = addDays(today, -1);
-    const { from, to } = stripWindow(at, STRIP_MAX_HOURS); // Loads the widest strip: changing the hours does not reload.
-    const results = await Promise.allSettled([
-      control.summary(scope),
-      control.incidents(scope),
-      control.resources(scope),
-      control.engineMetrics(scope, today),
-      control.engineMetrics(scope, yesterday, today),
-      api.trips(from, to).then(loaded => loaded.filter(t => scope === 'all' || t.BaseId == null || t.BaseId === scope)),
-      control.trends(scope, at, 7),
-      control.engineHourly(scope, at),
-      control.efficiency(scope, at),
-    ]);
+    const results = await controlReads(scope, at);
     if (id !== seq.current) return;
     // What fails keeps its last good value, marked as stale; nothing is emptied on refresh.
     setData(prev => ({
@@ -144,7 +131,10 @@ export function ControlPage({
   const trips = data?.trips;
   const act = useCallback((t: AlertTarget) => onAction(t, trips?.ok ? trips.value : []), [onAction, trips]);
   const scopeName = scope === 'all' ? t.common.allBases : (bases.find(b => b.Id === scope)?.Name ?? t.common.baseId(scope));
-  const retry = () => void load();
+  const retry = () => {
+    forgetReads();
+    void load();
+  };
 
   return (
     <div className="page space-y-6">

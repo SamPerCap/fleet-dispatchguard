@@ -25,7 +25,7 @@ function placeNow(): Place {
 const loadApplication = createAppLoader(
   () =>
     Promise.all([import('../DispatcherApp'), import('../i18n/t').then(module => module.catalogueReady())]).then(
-      ([module]) => module.DispatcherApp,
+      ([module]) => module,
     ),
   () => location.reload(),
   reloadMarkOfTheTab,
@@ -109,7 +109,7 @@ function Notice({ message, action, onAction }: { message: string; action: string
   );
 }
 
-type LoadedApplication = Awaited<ReturnType<typeof loadApplication>>;
+type LoadedApplication = Awaited<ReturnType<typeof loadApplication>>['DispatcherApp'];
 type ColdStart = ReturnType<typeof createColdStart>;
 
 /**
@@ -130,9 +130,19 @@ function Application({ seen, language: chosen }: { seen: SeenPage[]; language: s
       console.error('The application could not be loaded', failure);
       if (live) scene.applicationFailed();
     };
-    loadApplication().then(View => {
+    // The first view's reads start as soon as both the code and the database are there (SPEC 0102 R6).
+    let prefetch: (() => void) | null = null;
+    let databaseReady = false;
+    const prefetchOnce = () => {
+      if (!prefetch || !databaseReady) return;
+      prefetch();
+      prefetch = null;
+    };
+    loadApplication().then(module => {
       if (!live) return;
-      setLoaded({ View });
+      setLoaded({ View: module.DispatcherApp });
+      prefetch = module.prefetchFirstView;
+      prefetchOnce();
       scene.application();
     }, fail);
     Promise.all([import('../coldStart'), import('../session')]).then(([{ createColdStart, isReady }, { session }]) => {
@@ -140,6 +150,8 @@ function Application({ seen, language: chosen }: { seen: SeenPage[]; language: s
       coldStart.current = createColdStart({
         ask: () => isReady(session.fetch),
         onState: state => {
+          databaseReady = state === 'ready';
+          prefetchOnce();
           setDatabaseWaking(state === 'preparing');
           scene.database(state);
         },

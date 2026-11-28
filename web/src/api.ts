@@ -56,6 +56,7 @@ import type {
   VisitTimeline,
 } from './types';
 import { language } from './language';
+import { createReadCache, readKeyOf } from './readCache';
 
 /** Carries the backend ProblemDetails so that it is shown as it comes. */
 export class ApiError extends Error {
@@ -114,7 +115,28 @@ async function send(url: string, init: RequestInit = {}): Promise<Response> {
   }
 }
 
+const reads = createReadCache();
+
+/** The Control Centre's refresh button asks again even within the time a read is kept (SPEC 0102 R5). */
+export const forgetReads = () => reads.clear();
+
+/** Never kept: what carries a key of its own, and what answers about the session or the server rather than about the data. */
+const isKeptRead = (url: string, init?: RequestInit) =>
+  (init?.method ?? 'GET') === 'GET' && !init?.headers && !url.startsWith('/api/session') && !url.startsWith('/health');
+
 async function request<T>(url: string, init?: RequestInit): Promise<T> {
+  if (isKeptRead(url, init)) return reads.get(readKeyOf(url), () => answerOf<T>(url, init));
+  if ((init?.method ?? 'GET') === 'GET') return answerOf<T>(url, init);
+  // A write changes what the reads would say: forgotten before it leaves and again once it is answered, whatever the answer.
+  reads.clear();
+  try {
+    return await answerOf<T>(url, init);
+  } finally {
+    reads.clear();
+  }
+}
+
+async function answerOf<T>(url: string, init?: RequestInit): Promise<T> {
   const res = await send(url, init);
   const text = await res.text();
   let body: ProblemBody | undefined;
