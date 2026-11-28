@@ -115,7 +115,25 @@ async function send(url: string, init: RequestInit = {}): Promise<Response> {
   }
 }
 
-const reads = createReadCache();
+const refreshedListeners = new Set<() => void>();
+let announcing: ReturnType<typeof setTimeout> | null = null;
+/** Several reads refreshed behind at once make one reload of the views, not one each. */
+const announceRefreshed = () => {
+  if (announcing) return;
+  announcing = setTimeout(() => {
+    announcing = null;
+    refreshedListeners.forEach(listener => listener());
+  }, 300);
+};
+const reads = createReadCache(Date.now, announceRefreshed);
+
+/** The app reloads its views when a value painted from memory has been asked again behind (SPEC 0102 R1). */
+export function onReadsRefreshed(listener: () => void): () => void {
+  refreshedListeners.add(listener);
+  return () => {
+    refreshedListeners.delete(listener);
+  };
+}
 
 /** The Control Centre's refresh button asks again even within the time a read is kept (SPEC 0102 R5). */
 export const forgetReads = () => reads.clear();

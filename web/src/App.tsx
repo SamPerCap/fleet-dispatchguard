@@ -1,7 +1,7 @@
 import { t } from './i18n/t';
 import { BusFront, CalendarRange, ChevronRight, ClipboardList, LayoutDashboard, Menu, Scale, Search, ShieldCheck, Users } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { api } from './api';
+import { api, onReadsRefreshed } from './api';
 import type { AssignTarget } from './assignPeriod';
 import { AssignPeriodPanel } from './AssignPeriodPanel';
 import { BookingPanel, type PanelTarget } from './BookingPanel';
@@ -201,6 +201,11 @@ export function App({ offerTour, language }: { offerTour: boolean; language: str
     },
     [openResource],
   );
+  // A view painted from kept reads reloads once the newer answers arrive behind it.
+  useEffect(() => {
+    const stopListening = onReadsRefreshed(() => setVersion(v => v + 1));
+    return stopListening;
+  }, []);
   const changed = useCallback(() => {
     setVersion(v => v + 1);
     void loadMaster();
