@@ -28,6 +28,8 @@ public sealed record VisitBatchRequest(
     public const int LongestReference = 200;
 }
 
+public sealed record PageOpenedRequest([property: Required] OpenedPage? Page);
+
 public static class VisitsEndpoints
 {
     /// <summary>A batch leaves long before, and an older instant would fall outside the visit.</summary>
@@ -36,12 +38,13 @@ public static class VisitsEndpoints
     public static void MapVisitsEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapPost("/api/visits", RecordVisit).WithName("RecordVisit").WithTags("Visits");
+        app.MapPost("/api/visits/opened", PageOpened).WithName("PageOpened").WithTags("Visits");
     }
 
     [RecordsVisit]
     [NotTraced]
     private static async Task<NoContent> RecordVisit(
-        VisitBatchRequest batch, HttpContext context, VisitSettings settings, VisitNotice notice, IVisitLog log, CancellationToken cancellationToken)
+        VisitBatchRequest batch, HttpContext context, VisitSettings settings, IVisitLog log, CancellationToken cancellationToken)
     {
         if (AnonymousSession.IdOf(context.User) is not { } session)
         {
@@ -56,12 +59,20 @@ public static class VisitsEndpoints
             events.Insert(0, new VisitEventEntry(TimeSpan.Zero, VisitEventKind.Arrived, reference));
         }
 
-        if (await log.RecordAsync(session, reference, events, cancellationToken))
-        {
-            // Waited for, because the host may stop the process afterwards; the web does not wait for this answer.
-            await notice.SendAsync(AnonymousSession.ShortIdOf(session), reference);
-        }
+        await log.RecordAsync(session, reference, events, cancellationToken);
 
+        return TypedResults.NoContent();
+    }
+
+    /// <summary>
+    /// Without a session and without the database (SPEC 0103): whoever only reads the cover is noticed too, and nothing wakes up.
+    /// Waited for, because the host may stop the process afterwards; the web does not wait for this answer.
+    /// </summary>
+    [WithoutSession]
+    [NotTraced]
+    private static async Task<NoContent> PageOpened(PageOpenedRequest opened, HttpContext context, VisitNotice notice)
+    {
+        await notice.SendOpenedAsync(opened.Page!.Value, ClientOrigin.Of(context));
         return TypedResults.NoContent();
     }
 

@@ -15,6 +15,8 @@ public sealed partial class DatabaseStaysAsleepTests : IDisposable
 {
     private const string Ready = "/health/ready";
     private const string Session = "/api/session";
+    /// <summary>Answers without a session by design (SPEC 0103), and must still leave the database asleep.</summary>
+    private const string Opened = "/api/visits/opened";
     private const string OtherKey = "/////////////////////////////////////////38=";
 
     private readonly SilentDatabase _database = new();
@@ -62,7 +64,7 @@ public sealed partial class DatabaseStaysAsleepTests : IDisposable
         [.. factory.Services.GetRequiredService<EndpointDataSource>().Endpoints.OfType<RouteEndpoint>()
             .SelectMany(endpoint => (endpoint.Metadata.GetMetadata<HttpMethodMetadata>()?.HttpMethods ?? [])
                 .Select(method => (Method: method, Url: RouteParameter().Replace(endpoint.RoutePattern.RawText!, "1"))))
-            .Where(operation => operation.Url is not (Session or "/health/live"))];
+            .Where(operation => operation.Url is not (Session or "/health/live" or Opened))];
 
     [GeneratedRegex(@"\{[^}]+\}")]
     private static partial Regex RouteParameter();
@@ -74,7 +76,7 @@ public sealed partial class DatabaseStaysAsleepTests : IDisposable
         using var client = Browser(factory);
         var operations = Operations(factory);
         (string Method, string Url)[] others =
-            [("GET", "/health/live"), ("GET", Session), ("GET", "/"), ("GET", "/api/nothing"), ("HEAD", "/api/drivers")];
+            [("GET", "/health/live"), ("GET", Session), ("GET", "/"), ("GET", "/api/nothing"), ("HEAD", "/api/drivers"), ("POST", Opened)];
         var requests = others.Concat(operations).ToList();
         while (requests.Count < 100) requests.AddRange(operations);
 

@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using System.Net;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
 using DispatchGuard.API.Auditing;
 using DispatchGuard.Core.Auditing;
@@ -199,33 +200,58 @@ public sealed class VisitsHttpTests(PostgreSqlFixture server) : IAsyncLifetime
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
 
+    /// <summary>SPEC 0103 R6: the tool's batches are no longer a notice; opening a page is.</summary>
     [Fact]
-    public async Task Notice_IsSentOnceForEachSession()
+    public async Task VisitBatches_SendNoNotice()
     {
         await using var factory = Factory();
-        await using var otherInstance = Factory();
         using var client = await BrowserAsync(factory);
-        using var another = await BrowserAsync(otherInstance);
 
-        for (var i = 0; i < 3; i++) Assert.Equal(HttpStatusCode.NoContent, (await SendBatchAsync(client, "acme")).StatusCode);
-        await SendBatchAsync(another);
+        Assert.Equal(HttpStatusCode.NoContent, (await SendBatchAsync(client, "acme")).StatusCode);
 
-        Assert.Equal(2, _notices.Received.Count);
-        Assert.Contains("candidatura: acme", _notices.Received.First(), StringComparison.Ordinal);
-        Assert.Contains("sin enlace", _notices.Received.Last(), StringComparison.Ordinal);
+        Assert.Empty(_notices.Received);
+    }
+
+    /// <summary>SPEC 0103 R1–R3: no session needed, and one notice for the same visitor.</summary>
+    [Fact]
+    public async Task Opened_WithoutSession_OneNoticeForTheSameVisitor()
+    {
+        await using var factory = Factory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost") });
+
+        using var first = await client.PostAsJsonAsync("/api/visits/opened", new { Page = "Cover" });
+        using var second = await client.PostAsJsonAsync("/api/visits/opened", new { Page = "About" });
+
+        Assert.Equal(HttpStatusCode.NoContent, first.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, second.StatusCode);
+        Assert.Equal(["Visita en Fleet DispatchGuard · portada"], _notices.Received);
+    }
+
+    [Theory]
+    [InlineData("{\"Page\":\"Admin\"}")]
+    [InlineData("{}")]
+    [InlineData("not json")]
+    public async Task Opened_UnknownPage_IsRefusedAndNothingIsSent(string body)
+    {
+        await using var factory = Factory();
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost") });
+
+        using var response = await client.PostAsync("/api/visits/opened", new StringContent(body, Encoding.UTF8, "application/json"));
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Empty(_notices.Received);
     }
 
     [Fact]
-    public async Task Notice_ThatFails_DoesNotSpoilTheVisit()
+    public async Task Opened_NoticeThatFails_StillAnswersNoContent()
     {
         _notices.IsDown = true;
         await using var factory = Factory();
-        using var client = await BrowserAsync(factory);
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost") });
 
-        using var response = await SendBatchAsync(client, "acme");
+        using var response = await client.PostAsJsonAsync("/api/visits/opened", new { Page = "Application" });
 
         Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
-        Assert.NotEmpty(await EntriesAsync(client));
     }
 
     [Theory]

@@ -1,11 +1,12 @@
 import { ArrowLeft, Fingerprint, KeyRound, ListChecks, RefreshCw } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { audit } from '../api';
 import { durationText, entryName, fieldChanges, groupByThread, kindText, resultText, shortSession, toneOf, type EntryTone } from '../audit';
 import { formatDateTime, parseApiDate, TIME_ZONE } from '../gantt';
 import type { RequestTraceDetail, TimelineEntry, VisitSummary, VisitTimeline } from '../types';
 import { EmptyState, ErrorState, PageHeader, SkeletonLines } from '../ui';
 import { useLoad } from '../useLoad';
+import { openedNotice } from '../showcase/opened';
 
 const TONE_CLASS: Record<EntryTone, string> = {
   wrong: 'bg-critical-soft text-critical-ink',
@@ -30,6 +31,11 @@ function Visits({ auditKey, onLeave }: { auditKey: string; onLeave: () => void }
   const [list, retryList] = useLoad(() => audit.visits(auditKey), [auditKey]);
   const [timeline, retryTimeline] = useLoad(sessionId === null ? null : () => audit.visit(sessionId, auditKey), [sessionId, auditKey]);
   const showsList = sessionId === null;
+
+  // The key was accepted: from now on this browser is the author's, and opening the site is not a notice (SPEC 0103 R5).
+  useEffect(() => {
+    if (list?.ok) openedNotice.markAuthor();
+  }, [list]);
 
   return (
     <>

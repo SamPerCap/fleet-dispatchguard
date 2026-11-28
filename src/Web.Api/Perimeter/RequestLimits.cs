@@ -17,11 +17,6 @@ public sealed class RequestLimits(RequestLimitSettings settings, DemoResetKey re
 {
     private const string Exempt = "exempt";
 
-    /// <summary>Shared by every request whose origin is not known: none of them is left without a limit.</summary>
-    private const string UnknownOrigin = "unknown";
-
-    private const int Ipv6BytesOfTheNetwork = 8;
-
     public void Configure(RateLimiterOptions options)
     {
         options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -55,29 +50,18 @@ public sealed class RequestLimits(RequestLimitSettings settings, DemoResetKey re
     {
         if (context.IsHeavyCalculation())
         {
-            return Fixed($"heavy {OriginOf(context)}", settings.Ip.Heavy);
+            return Fixed($"heavy {ClientOrigin.Of(context)}", settings.Ip.Heavy);
         }
 
         return context.StartsSession() && AnonymousSession.IdOf(context.User) is null
-            ? Fixed($"session {OriginOf(context)}", settings.Ip.NewSessions)
+            ? Fixed($"session {ClientOrigin.Of(context)}", settings.Ip.NewSessions)
             : RateLimitPartition.GetNoLimiter(Exempt);
     }
 
-    private RateLimitPartition<string> OfIp(HttpContext context) => Fixed(OriginOf(context), settings.Ip.Total);
+    private RateLimitPartition<string> OfIp(HttpContext context) => Fixed(ClientOrigin.Of(context), settings.Ip.Total);
 
     private RateLimitPartition<string> Fixed(string key, int limit) => RateLimitPartition.GetFixedWindowLimiter(
         key, _ => new FixedWindowRateLimiterOptions { PermitLimit = limit, Window = settings.Window, QueueLimit = 0 });
-
-    private static string OriginOf(HttpContext context) => context.Connection.RemoteIpAddress switch
-    {
-        null => UnknownOrigin,
-        { IsIPv4MappedToIPv6: true } address => address.MapToIPv4().ToString(),
-        { AddressFamily: AddressFamily.InterNetworkV6 } address => NetworkOf(address),
-        var address => address.ToString()
-    };
-
-    /// <summary>The /64: whoever has an IPv6 address has the 2^64 of its network to change to.</summary>
-    private static string NetworkOf(IPAddress address) => Convert.ToHexString(address.GetAddressBytes().AsSpan(0, Ipv6BytesOfTheNetwork));
 
     private static async ValueTask WriteRejectionAsync(OnRejectedContext rejection, CancellationToken cancellationToken)
     {

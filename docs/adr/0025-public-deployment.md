@@ -26,6 +26,7 @@ The demo has hardly any visits, must survive months without anyone looking after
 - The quotas live in the memory of each instance: with several, they are for each of them.
 - The session key cannot be changed without ending the sessions. Nothing else is lost: a session has no permissions.
 - A container that builds but does not start is published: that is what `release.ps1` checks before and after.
+- Update (2026-11-28): one explicit exception to “nothing without a session”: `POST /api/visits/opened` (SPEC 0103) answers without one, because it reads nothing; `DatabaseStaysAsleepTests` keeps proving that no request without a session opens a connection.
 - Update (2026-11-27): Vercel deploys the `production` branch of the **public repository**. `release.ps1` checks the private commit as before, exports it (allowlist, rewrites and the content gates of the export) as one more commit on the public history, and moves the public `master` and `production` to it; the private `production` moves too, as the record of what is migrated. It stops if the public repository has commits that no export made, so that publishing never undoes them.
 - Update (2026-11-25): the script asks for the connection string only when there are migrations and, the only secret it keeps, for that of the bot protection once. It is encrypted with the Windows user: a program run by that user could read it, and it only lets through the bot protection.
 - If both attempts of a night fail, the demo may stay half loaded until the next one, or until the cron is run by hand.

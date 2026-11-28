@@ -2,6 +2,8 @@
 
 - **Status:** accepted (plan approved by the user, 2026-11-25) · **Origin:** SPEC 0085 · **Completes:** ADR 0021, 0024 and 0025
 
+
+> **2026-11-28 (SPEC 0103):** the notice no longer depends on the session. Opening any page (cover included) sends `POST /api/visits/opened`, which needs no session and reads no database; the server sends one notice per visitor every 30 minutes, and none from the browser where the audit key was accepted. The visit timeline below is unchanged.
 ## Context
 The author wants to know whether anyone enters the demo, through which application and what they do. The demo is a container that stops after 5 idle minutes, perhaps with several instances, and a database that sleeps, has 1 GB and is paid with free hours. There is no login: a session identifies a browser.
 

@@ -11,6 +11,7 @@ import { LoadingScene } from './LoadingScene';
 import { closingMarkOfTheTab, createLoadingScene, type ScenePhase } from './loadingPhases';
 import { Cover } from './Cover';
 import { EngineeringPage } from './EngineeringPage';
+import { openedNotice } from './opened';
 import type { SeenPage } from './seenPages';
 import { showcaseText } from './showcaseText';
 
@@ -46,6 +47,10 @@ export function Root() {
       removeEventListener('hashchange', onAddress);
       removeEventListener('popstate', onAddress);
     };
+  }, []);
+
+  useEffect(() => {
+    openedNotice.announce(placeNow());
   }, []);
 
   useEffect(() => {

@@ -57,7 +57,9 @@ describe('the cover and the engineering page ask nothing (SPEC 0093 CA1)', () =>
     expect(loaded).toEqual(expect.arrayContaining(['../showcase/Cover.tsx', '../showcase/EngineeringPage.tsx', '../showcase/AboutPage.tsx']));
     const asking = ['../api.ts', '../session.ts', '../visit.ts', '../coldStart.ts', '../App.tsx'];
     expect(loaded.filter(file => asking.includes(file))).toEqual([]);
-    expect(loaded.filter(file => ASKS.test(sources[file]))).toEqual([]);
+    // The single exception (SPEC 0103): the notice that the site was opened, which needs no session and reads no database.
+    expect(loaded.filter(file => ASKS.test(sources[file]))).toEqual(['../showcase/opened.ts']);
+    expect(sources['../showcase/opened.ts'].match(/fetch\('[^']+'/g)).toEqual(["fetch('/api/visits/opened'"]);
   });
 
   it('the application does have it, so the check above sees what it looks for', () => {

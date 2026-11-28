@@ -1,3 +1,6 @@
+using System.Collections.Concurrent;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.RateLimiting;
 using DispatchGuard.Core.Auditing;
 
@@ -44,46 +47,80 @@ public sealed class VisitSettings
         received is not null && _references.TryGetValue(received.Trim(), out var known) ? known : null;
 }
 
-/// <summary>
-/// Tells the author that a visit has started (SPEC 0085 R9). A plain text to an address that is itself the secret, so it is never
-/// written in a log.
-/// </summary>
-public sealed class VisitNotice(VisitSettings settings, ILogger<VisitNotice> logger, HttpMessageHandler? handler = null) : IDisposable
+/// <summary>The pages a visitor can open; anything else is refused (SPEC 0103 R7).</summary>
+public enum OpenedPage
 {
-    /// <summary>Whoever starts sessions in bulk does not fill the telephone of the author.</summary>
+    Cover,
+    Engineering,
+    About,
+    Application
+}
+
+/// <summary>
+/// Tells the author that someone opened the site (SPEC 0103). A plain text to an address that is itself the secret, so it is never
+/// written in a log. It reads no database: opening the cover must not wake it up.
+/// </summary>
+public sealed class VisitNotice : IDisposable
+{
+    /// <summary>The same visitor within this time is the same visit; after it, coming back is news (SPEC 0103 R3).</summary>
+    public static readonly TimeSpan SameVisitor = TimeSpan.FromMinutes(30);
+
+    /// <summary>Whoever opens the site in bulk does not fill the telephone of the author.</summary>
     private const int MostInAnHour = 30;
+
+    /// <summary>Past this many visitors remembered, the stale ones are forgotten: memory stays small whatever the traffic.</summary>
+    private const int VisitorsBeforeCleaning = 1_000;
 
     private static readonly TimeSpan LongestWait = TimeSpan.FromSeconds(3);
 
-    private readonly HttpClient _client = new(handler ?? new SocketsHttpHandler { AllowAutoRedirect = false }) { Timeout = LongestWait };
+    private readonly VisitSettings _settings;
+    private readonly ILogger<VisitNotice> _logger;
+    private readonly TimeProvider _clock;
+    private readonly HttpClient _client;
+    private readonly FixedWindowRateLimiter _limit;
+    private readonly ConcurrentDictionary<string, DateTimeOffset> _lastNoticeOf = new();
 
-    private readonly FixedWindowRateLimiter _limit = new(new FixedWindowRateLimiterOptions
-    {
-        PermitLimit = MostInAnHour, Window = TimeSpan.FromHours(1), QueueLimit = 0
-    });
+    // Only to recognise the same address within this process: it is never stored nor sent, and changes on every start.
+    private readonly byte[] _salt = RandomNumberGenerator.GetBytes(32);
 
-    /// <summary>It never fails: a visit does not depend on it.</summary>
-    public async Task SendAsync(string shortSessionId, string? reference)
+    public VisitNotice(VisitSettings settings, ILogger<VisitNotice> logger, HttpMessageHandler? handler = null, TimeProvider? clock = null)
     {
+        _settings = settings;
+        _logger = logger;
+        _clock = clock ?? TimeProvider.System;
+        _client = new HttpClient(handler ?? new SocketsHttpHandler { AllowAutoRedirect = false }) { Timeout = LongestWait };
+        _limit = new FixedWindowRateLimiter(new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = MostInAnHour, Window = TimeSpan.FromHours(1), QueueLimit = 0
+        });
+    }
+
+    /// <summary>It never fails: opening a page does not depend on it.</summary>
+    public async Task SendOpenedAsync(OpenedPage page, string visitorAddress)
+    {
+        if (_settings.NoticeUrl is not { } address || !IsNewVisit(VisitorOf(visitorAddress)))
+        {
+            return;
+        }
+
         using var permit = _limit.AttemptAcquire();
-        if (settings.NoticeUrl is not { } address || !permit.IsAcquired)
+        if (!permit.IsAcquired)
         {
             return;
         }
 
         try
         {
-            var origin = reference is null ? "sin enlace de candidatura" : $"candidatura: {reference}";
-            using var content = new StringContent($"Visita nueva en Fleet DispatchGuard · {origin} · sesión {shortSessionId}");
+            using var content = new StringContent($"Visita en Fleet DispatchGuard · {NameOf(page)}");
             using var response = await _client.PostAsync(address, content);
             if (!response.IsSuccessStatusCode)
             {
-                logger.LogWarning("The notice of a visit was answered {Status}", (int)response.StatusCode);
+                _logger.LogWarning("The notice of a visit was answered {Status}", (int)response.StatusCode);
             }
         }
         catch (Exception exception)
         {
-            logger.LogWarning("The notice of a visit could not be sent: {Reason}", exception.GetType().Name);
+            _logger.LogWarning("The notice of a visit could not be sent: {Reason}", exception.GetType().Name);
         }
     }
 
@@ -91,5 +128,48 @@ public sealed class VisitNotice(VisitSettings settings, ILogger<VisitNotice> log
     {
         _client.Dispose();
         _limit.Dispose();
+    }
+
+    // Only the author reads it, so it is in Spanish like the rest of the private audit.
+    private static string NameOf(OpenedPage page) => page switch
+    {
+        OpenedPage.Cover => "portada",
+        OpenedPage.Engineering => "cómo está hecho",
+        OpenedPage.About => "sobre mí",
+        _ => "herramienta"
+    };
+
+    private string VisitorOf(string address) =>
+        Convert.ToHexString(SHA256.HashData([.. _salt, .. Encoding.UTF8.GetBytes(address)]));
+
+    private bool IsNewVisit(string visitor)
+    {
+        var now = _clock.GetUtcNow();
+        if (_lastNoticeOf.Count > VisitorsBeforeCleaning)
+        {
+            ForgetVisitorsBefore(now - SameVisitor);
+        }
+
+        var isNew = true;
+        _lastNoticeOf.AddOrUpdate(
+            visitor,
+            now,
+            (_, last) =>
+            {
+                isNew = now - last >= SameVisitor;
+                return isNew ? now : last;
+            });
+        return isNew;
+    }
+
+    private void ForgetVisitorsBefore(DateTimeOffset limit)
+    {
+        foreach (var (visitor, last) in _lastNoticeOf)
+        {
+            if (last < limit)
+            {
+                _lastNoticeOf.TryRemove(visitor, out _);
+            }
+        }
     }
 }
