@@ -9,7 +9,7 @@ export const ENGINEERING_HASH = '#how-it-is-built';
 const OLD_ENGINEERING_HASH = '#como-esta-hecho';
 export const ABOUT_HASH = '#about';
 export const START_HASH = '#control';
-/** The cover's shortest way to the key moment: the tool opens with the tour already looking for an illegal case (SPEC 0104). */
+/** Kept so that links shared while the cover had a button for it still open the tool (SPEC 0104, button removed 2026-11-28). */
 export const BREAK_THE_LAW_HASH = '#break-the-law';
 
 /** A link to something of the application goes straight to it (SPEC 0093 R1). */
@@ -26,8 +26,7 @@ export function currentAnchorOf(hash: string): string | null {
   return hash === OLD_ENGINEERING_HASH ? ENGINEERING_HASH : null;
 }
 
-/** Whoever asked to break the law skips the offer; coming from the cover only offers it; a shared link to a page brings none. */
-export function tourStartOf(hash: string, comesFromTheCover: boolean): 'offer' | 'searching' | null {
-  if (hash === BREAK_THE_LAW_HASH) return 'searching';
+/** Coming from the cover offers the tour; a shared link to a page brings none. */
+export function tourStartOf(comesFromTheCover: boolean): 'offer' | null {
   return comesFromTheCover ? 'offer' : null;
 }

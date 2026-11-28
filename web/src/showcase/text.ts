@@ -20,7 +20,6 @@ export interface ShowcaseText {
     /** The thesis: one sentence the visitor can check in the demo itself (SPEC 0096 R1). */
     title: string;
     problem: string;
-    breakTheLaw: string;
     tryIt: string;
     howItIsBuilt: string;
     about: string;

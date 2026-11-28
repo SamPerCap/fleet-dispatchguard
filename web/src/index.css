@@ -221,6 +221,10 @@
 @keyframes brand-arrive { from { transform: translateX(-110vw); } to { transform: none; } }
 @keyframes brand-leave { from { transform: none; } to { transform: translateX(110vw); } }
 
+/* The tour's offer hops once every 2.5 s while nobody has answered it; `fade-in` runs first. */
+.tour-nudge { animation: brand-fade 160ms var(--ease) backwards, tour-nudge 2500ms ease-in-out 1s infinite; }
+@keyframes tour-nudge { 0%, 16%, 100% { transform: translateY(0); } 6% { transform: translateY(-10px); } 11% { transform: translateY(-3px); } }
+
 /* No other constant motion; none at all if the system asks to reduce it. */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }

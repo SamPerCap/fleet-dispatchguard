@@ -101,7 +101,7 @@ export function App({ offerTour, language }: { offerTour: boolean; language: str
     const hashPage = location.hash.slice(1);
     return isPage(hashPage) ? hashPage : 'control';
   });
-  const [tour, setTour] = useState(() => tourStartOf(location.hash, offerTour));
+  const [tour, setTour] = useState<'offer' | 'searching' | null>(() => tourStartOf(offerTour));
   const [rulesGroup, setRulesGroup] = useState<string | null>(null);
   const [operator, setOperator] = useState(assignedBy);
   const [drivers, setDrivers] = useState<Driver[]>([]);

@@ -10,7 +10,6 @@ export const es: ShowcaseText = {
     title: 'Nunca guarda una asignación ilegal. Intenta que lo haga.',
     problem:
       'Lo difícil no es encontrar a alguien libre, sino a alguien que pueda conducir legalmente: pausas, descansos y límites de horas (CE 561/2006).\nFleet DispatchGuard lo comprueba antes de guardar y, si no se cumple, dice qué regla y por qué.',
-    breakTheLaw: 'Intenta saltarte la ley',
     tryIt: 'Probar',
     howItIsBuilt: 'Cómo está hecho',
     about: 'Sobre mí',

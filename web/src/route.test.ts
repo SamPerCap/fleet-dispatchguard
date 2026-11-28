@@ -32,21 +32,16 @@ describe('what an address shows', () => {
   });
 });
 
-describe('the 60-second path from the cover (SPEC 0104 R1–R3)', () => {
-  it('«Try to break the law» opens the application', () => {
+describe('the tour from the cover (SPEC 0104, amended)', () => {
+  it('an old link to «Try to break the law» still opens the application', () => {
     expect(placeOf(BREAK_THE_LAW_HASH, '')).toBe('application');
   });
 
-  it('it starts the tour already searching, even without coming from the cover', () => {
-    expect(tourStartOf(BREAK_THE_LAW_HASH, false)).toBe('searching');
-    expect(tourStartOf(BREAK_THE_LAW_HASH, true)).toBe('searching');
-  });
-
-  it('from the cover by any other way the tour is only offered', () => {
-    expect(tourStartOf('#control', true)).toBe('offer');
+  it('coming from the cover the tour is offered', () => {
+    expect(tourStartOf(true)).toBe('offer');
   });
 
   it('a direct link to a page brings no tour', () => {
-    expect(tourStartOf('#control', false)).toBeNull();
+    expect(tourStartOf(false)).toBeNull();
   });
 });

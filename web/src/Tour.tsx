@@ -57,7 +57,10 @@ export function Tour({ startAt, locName, onTryIt, onEngine, onClose }: Props) {
   return (
     <aside
       aria-label={t.app.tour}
-      className="fade-in fixed bottom-6 right-6 z-40 w-[min(400px,calc(100vw-48px))] rounded-lg bg-surface p-5 shadow-pop"
+      // While it only offers, it nudges every few seconds: easy to miss in a corner of a busy page (user, 2026-11-28).
+      className={`fade-in fixed bottom-6 right-6 z-40 w-[min(440px,calc(100vw-48px))] rounded-lg bg-surface p-5 shadow-pop ${
+        state.at === 'offer' ? 'tour-nudge ring-2 ring-blue' : ''
+      }`}
     >
       <button type="button" aria-label={t.common.close} className="btn btn-ghost btn-icon absolute right-3 top-3" onClick={onClose}>
         <X className="h-4 w-4" aria-hidden />

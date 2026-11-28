@@ -6,7 +6,6 @@ export const en: ShowcaseText = {
     title: 'It never saves an illegal assignment. Try to make it.',
     problem:
       "The hard part isn't finding someone who is free, but someone who can legally drive: breaks, rest periods and limits on driving time (EC 561/2006).\nFleet DispatchGuard checks it before saving and, when a rule is broken, says which one and why.",
-    breakTheLaw: 'Try to break the law',
     tryIt: 'Try it',
     howItIsBuilt: "How it's built",
     about: 'About',
