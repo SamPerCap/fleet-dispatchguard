@@ -1,7 +1,7 @@
 import type { ColdStartState } from '../coldStart';
 
 /**
- * - `quiet`: nothing shown yet, so a warm start never flashes.
+ * - `quiet`: nothing shown yet, so a warm start on a later entry never flashes.
  * - `red`: real work is pending (the code, the session or the database).
  * - `green`: everything answered; the closing plays before going in.
  * - `in`: the application is shown.
@@ -10,8 +10,13 @@ import type { ColdStartState } from '../coldStart';
  */
 export type ScenePhase = 'quiet' | 'red' | 'green' | 'in' | 'failed' | 'late';
 
-/** The only time added on purpose, and only once per tab (SPEC 0101 R4, R10). */
+/** The closing after the green light: only on the first entry of a tab (SPEC 0101 R4, R10). */
 export const CLOSING_MS = 1_500;
+/**
+ * On the first entry of a tab the red light lasts at least this, so that a warm start still shows a few messages and the first
+ * vehicles stopping (SPEC 0101 R11, user 2026-11-28). Later entries add nothing.
+ */
+export const MIN_RED_MS = 4_500;
 
 export interface ClosingMark {
   isSet: () => boolean;
@@ -30,7 +35,9 @@ export function createLoadingScene({ onPhase, closing, reducedMotion, quietMs }:
   let applicationLoaded = false;
   let database: ColdStartState | null = null;
   let stopped = false;
+  let minimumPassed = false;
   const timers: ReturnType<typeof setTimeout>[] = [];
+  const wholeScene = !reducedMotion && !closing.isSet();
 
   const go = (next: ScenePhase) => {
     if (stopped || phase === next) return;
@@ -47,17 +54,28 @@ export function createLoadingScene({ onPhase, closing, reducedMotion, quietMs }:
       if (phase === 'late') go('red');
       return;
     }
-    if (phase === 'quiet' || reducedMotion || closing.isSet()) return go('in');
+    if (!wholeScene) return go('in');
+    if (!minimumPassed) return;
     closing.set();
     go('green');
     timers.push(setTimeout(() => go('in'), CLOSING_MS));
   };
 
-  timers.push(
-    setTimeout(() => {
-      if (phase === 'quiet') go('red');
-    }, quietMs),
-  );
+  if (wholeScene) {
+    go('red');
+    timers.push(
+      setTimeout(() => {
+        minimumPassed = true;
+        settle();
+      }, MIN_RED_MS),
+    );
+  } else {
+    timers.push(
+      setTimeout(() => {
+        if (phase === 'quiet') go('red');
+      }, quietMs),
+    );
+  }
 
   return {
     application: () => {

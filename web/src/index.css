@@ -216,12 +216,10 @@
 .traffic-car.is-stopped .traffic-wheel { animation: none; }
 .traffic-car.is-stopped .traffic-idle { animation-duration: 260ms; }
 .traffic-car.is-leaving { transform: none; animation: brand-leave 1200ms ease-in forwards; }
-.traffic-car.is-passing { animation: brand-pass 1600ms linear forwards; }
 .traffic-light-post { position: absolute; bottom: 0; }
 .traffic-lamp { filter: drop-shadow(0 0 6px currentColor); }
 @keyframes brand-arrive { from { transform: translateX(-110vw); } to { transform: none; } }
 @keyframes brand-leave { from { transform: none; } to { transform: translateX(110vw); } }
-@keyframes brand-pass { from { transform: translateX(-110vw); } to { transform: translateX(110vw); } }
 
 /* No other constant motion; none at all if the system asks to reduce it. */
 @media (prefers-reduced-motion: reduce) {

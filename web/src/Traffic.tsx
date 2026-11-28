@@ -15,15 +15,19 @@ const ARRIVE_EVERY_MS = 1_300;
 /** The first in the queue leaves first, the rest follow as it opens up. */
 const LEAVE_STAGGER_MS = 120;
 
+type Progress = 'waiting' | 'arriving' | 'stopped';
+
 /**
- * Vehicles come in from the left and stop at a red light on the right, queueing up while the application loads; on green they
- * drive off. One that had not reached the queue yet does not stop: it goes straight through (SPEC 0101). Decorative.
+ * Vehicles come in from the left and stop at a red light on the right, queueing up while the application loads. On green, those
+ * in the queue drive off, one still braking finishes and follows, and one that had not come in yet never appears: nothing starts
+ * again from the left (SPEC 0101). Decorative.
  */
 export function TrafficRoad({ green }: { green: boolean }) {
-  const [stopped, setStopped] = useState<Set<number>>(() => new Set());
-  const onArrived = (place: number) => (event: AnimationEvent) => {
+  const [progress, setProgress] = useState<Progress[]>(() => QUEUE.map(() => 'waiting'));
+  const mark = (place: number, next: Progress) => (event: AnimationEvent) => {
+    // The bounce and the wheels inside animate too: only the vehicle's own drive counts.
     if (event.target !== event.currentTarget) return;
-    setStopped(current => new Set(current).add(place));
+    setProgress(current => current.map((value, index) => (index === place ? next : value)));
   };
   let fromStopLine = 0;
   return (
@@ -31,14 +35,16 @@ export function TrafficRoad({ green }: { green: boolean }) {
       {QUEUE.map(({ Vehicle, tone, width }, place) => {
         const right = fromStopLine;
         fromStopLine += width + QUEUE_GAP;
-        const motion = !green ? 'is-arriving' : stopped.has(place) ? 'is-leaving' : 'is-passing';
-        const delay = green ? (stopped.has(place) ? place * LEAVE_STAGGER_MS : 0) : place * ARRIVE_EVERY_MS;
+        const state = progress[place];
+        if (green && state === 'waiting') return null;
+        const leaving = green && state === 'stopped';
         return (
           <span
-            key={`${place}-${motion}`}
-            className={`traffic-car ${motion} ${stopped.has(place) && !green ? 'is-stopped' : ''} ${tone}`}
-            style={{ right: `calc(${STOP_LINE} + ${right}px)`, animationDelay: `${delay}ms` }}
-            onAnimationEnd={green ? undefined : onArrived(place)}
+            key={`${place}-${leaving ? 'leave' : 'arrive'}`}
+            className={`traffic-car ${leaving ? 'is-leaving' : 'is-arriving'} ${state === 'stopped' && !green ? 'is-stopped' : ''} ${tone}`}
+            style={{ right: `calc(${STOP_LINE} + ${right}px)`, animationDelay: `${leaving ? place * LEAVE_STAGGER_MS : place * ARRIVE_EVERY_MS}ms` }}
+            onAnimationStart={leaving ? undefined : mark(place, 'arriving')}
+            onAnimationEnd={leaving ? undefined : mark(place, 'stopped')}
           >
             <span className="traffic-idle" style={{ animationDelay: `${-0.13 * place}s` }}>
               <Vehicle />
