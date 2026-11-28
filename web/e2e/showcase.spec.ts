@@ -1,6 +1,12 @@
 import { expect, test, type Page } from '@playwright/test';
+import { skipLoaderClosingBeforeEach } from './session';
 
-// SPEC 0093 CA3.
+skipLoaderClosingBeforeEach();
+
+/** The only request the showcase makes: the notice that a page was opened (SPEC 0103). */
+const OPENED = '/api/visits/opened';
+
+// SPEC 0093 CA3, with the single exception of SPEC 0103.
 
 function requestsOf(page: Page): string[] {
   const asked: string[] = [];
@@ -20,11 +26,11 @@ test('The cover asks nothing until «Probar», and the back button returns to it
   await page.getByRole('button', { name: 'Español' }).click();
   await page.getByRole('link', { name: 'Cómo está hecho' }).click();
   await expect(page.getByRole('heading', { name: 'Cómo está hecho', level: 1 })).toBeVisible();
-  expect(asked).toEqual([]);
+  expect(asked).toEqual([OPENED]);
 
   await page.getByRole('link', { name: 'Probar' }).click();
   await expect(page.getByRole('navigation', { name: 'Principal' })).toBeVisible();
-  expect(asked[0]).toBe('/api/session');
+  expect(asked.filter(path => path !== OPENED)[0]).toBe('/api/session');
 
   await page.goBack();
   await expect(page.getByRole('heading', { name: 'Cómo está hecho', level: 1 })).toBeVisible();
@@ -36,7 +42,7 @@ test('About asks nothing either, and on a phone the menu of the application wait
   await page.getByRole('link', { name: 'Sobre mí' }).click();
   await expect(page.getByRole('heading', { name: 'Sobre mí', level: 1 })).toBeVisible();
   await expect(page.getByRole('link', { name: 'GitHub' })).toBeVisible();
-  expect(asked).toEqual([]);
+  expect(asked).toEqual([OPENED]);
 
   await page.setViewportSize({ width: 360, height: 740 });
   await page.getByRole('link', { name: 'Probar' }).click();
@@ -58,7 +64,7 @@ test('The tour writes nothing, and can be left', async ({ page }) => {
   const written: string[] = [];
   page.on('request', request => {
     const { pathname } = new URL(request.url());
-    if (request.method() !== 'GET' && pathname !== '/api/visits') written.push(`${request.method()} ${pathname}`);
+    if (request.method() !== 'GET' && pathname !== '/api/visits' && pathname !== OPENED) written.push(`${request.method()} ${pathname}`);
   });
   await page.goto('/');
   await page.getByRole('link', { name: 'Probar' }).click();

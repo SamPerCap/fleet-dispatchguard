@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
-import { writer } from './session';
+import { skipLoaderClosingBeforeEach, writer } from './session';
+
+skipLoaderClosingBeforeEach();
 
 test('Control centre: traffic light, panels, base filter and an alert that opens its booking', async ({ page, request }) => {
   // An uncovered service leaving in 10 min at base 1 → urgent alert "Asignar conductor y vehículo".

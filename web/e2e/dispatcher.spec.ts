@@ -1,8 +1,9 @@
 import { expect, test, type Page } from '@playwright/test';
-import { startSessionBeforeEach, writer } from './session';
+import { skipLoaderClosingBeforeEach, startSessionBeforeEach, writer } from './session';
 import { iso, nextMonday } from './week';
 
 startSessionBeforeEach();
+skipLoaderClosingBeforeEach();
 
 const tuesday = () => {
   const date = nextMonday();
@@ -165,7 +166,8 @@ async function reassignableTrip(page: Page): Promise<SeededTrip> {
   for (const trip of (await tuesdayTrips(page)).filter(t => t.Status === 'Assigned' && t.AssignedDriverId != null && t.AssignedVehicleId != null)) {
     const booking = await (await page.request.get(`/api/bookings/${trip.BookingId}`)).json();
     if (booking.Trips.length < 2) continue;
-    const options = await (await page.request.get(`/api/trips/${trip.Id}/driver-options`)).json();
+    // In the language of the page: the reason is compared with what the list shows (SPEC 0095).
+  const options = await (await page.request.get(`/api/trips/${trip.Id}/driver-options`, { headers: { 'Accept-Language': 'es' } })).json();
     const buses = await (await page.request.get(`/api/trips/${trip.Id}/vehicle-candidates`)).json();
     if (options.Candidates.length > 0 && buses.length > 0) return trip;
   }
@@ -600,7 +602,8 @@ test('vehicle data: somebody else saves first; what was typed stays, and the cur
 
 test('booking panel: the driver and the bus are searched, and who cannot be chosen says why', async ({ page }) => {
   const trip = await reassignableTrip(page);
-  const options = await (await page.request.get(`/api/trips/${trip.Id}/driver-options`)).json();
+  // In the language of the page: the reason is compared with what the list shows (SPEC 0095).
+  const options = await (await page.request.get(`/api/trips/${trip.Id}/driver-options`, { headers: { 'Accept-Language': 'es' } })).json();
   const buses = await (await page.request.get(`/api/trips/${trip.Id}/vehicle-candidates?maxResults=1000`)).json();
   const driver = options.Candidates.at(-1) as { DriverId: number; FullName: string };
   const bus = buses.at(-1) as { VehicleId: number; LicensePlate: string };

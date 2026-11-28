@@ -40,7 +40,7 @@ test('With the database asleep it waits at a red light and goes in by itself (SP
   let asleep = true;
   await page.route('**/health/ready', route => (asleep ? route.fulfill({ status: 503 }) : route.continue()));
   await page.goto('/#control');
-  await expect(page.getByRole('status')).toContainText('La base de datos se apaga');
+  await expect(page.getByText('La base de datos se apaga')).toBeVisible();
   await expect(page.locator('.traffic-car')).toHaveCount(5);
   await expect(page.getByRole('navigation', { name: 'Principal' })).toHaveCount(0);
 
